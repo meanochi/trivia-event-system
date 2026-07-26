@@ -1,0 +1,12 @@
+.launcher {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  text-align: center;
+  padding: 2rem;
+}
+.launcher-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+.launcher-note { color: var(--muted); max-width: 26rem; }

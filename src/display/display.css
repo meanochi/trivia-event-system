@@ -1,0 +1,65 @@
+.display-screen {
+  height: 100vh;
+  padding: 2rem;
+  overflow: hidden;
+  position: relative;
+}
+.display-screen.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.display-waiting {
+  color: var(--muted);
+  font-size: 1.3rem;
+  animation: pulse 1.6s infinite;
+}
+
+.logo-entrance {
+  animation: pop-in 0.7s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.display-subtitle {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  color: var(--yellow);
+  text-shadow: var(--glow-yellow);
+  animation: pop-in 0.5s 0.2s backwards;
+}
+
+/* ===== כותרת שלב ===== */
+.stage-kicker {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--pink);
+  text-shadow: var(--glow-pink);
+  animation: pop-in 0.5s;
+}
+.stage-title-big {
+  font-family: var(--font-display);
+  font-size: min(11vw, 8rem);
+  line-height: 1.05;
+  text-align: center;
+  color: #fff;
+  -webkit-text-stroke: 0.03em #1b0f35;
+  text-shadow: 0.04em 0.05em 0 #1b0f35, 0 0 40px rgba(255, 47, 160, 0.5);
+  animation: pop-in 0.6s 0.15s backwards;
+}
+.stage-underline {
+  width: min(50vw, 26rem);
+  height: 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink), var(--yellow), var(--green));
+  box-shadow: var(--glow-yellow);
+  animation: pop-in 0.5s 0.3s backwards;
+}
+
+.display-corner-logo {
+  position: absolute;
+  top: 1.2rem;
+  inset-inline-start: 1.6rem;
+  opacity: 0.85;
+}
