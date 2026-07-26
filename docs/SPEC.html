@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<meta charset="utf-8">
+<title>מסמך אפיון — פונקט פארקערט</title>
+<style>
+  :root {
+    --paper: #faf9fd;
+    --panel: #f1eef8;
+    --panel-line: #ddd6ec;
+    --ink: #221a36;
+    --ink-soft: #5c5378;
+    --pink: #d81b8c;
+    --green: #4f8f00;
+    --gold: #b07d00;
+    --admin-bg: #eef4e4;
+    --public-bg: #fdeef7;
+    --done: #4f8f00;
+    --code-bg: #ece7f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #1e1731;
+      --panel: #2a2145;
+      --panel-line: #423761;
+      --ink: #ece8f6;
+      --ink-soft: #a99fc7;
+      --pink: #ff5cb8;
+      --green: #9fdb4a;
+      --gold: #ffd34d;
+      --admin-bg: #27321c;
+      --public-bg: #3c1f31;
+      --done: #9fdb4a;
+      --code-bg: #322850;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1e1731;
+    --panel: #2a2145;
+    --panel-line: #423761;
+    --ink: #ece8f6;
+    --ink-soft: #a99fc7;
+    --pink: #ff5cb8;
+    --green: #9fdb4a;
+    --gold: #ffd34d;
+    --admin-bg: #27321c;
+    --public-bg: #3c1f31;
+    --done: #9fdb4a;
+    --code-bg: #322850;
+  }
+  :root[data-theme="light"] {
+    --paper: #faf9fd;
+    --panel: #f1eef8;
+    --panel-line: #ddd6ec;
+    --ink: #221a36;
+    --ink-soft: #5c5378;
+    --pink: #d81b8c;
+    --green: #4f8f00;
+    --gold: #b07d00;
+    --admin-bg: #eef4e4;
+    --public-bg: #fdeef7;
+    --done: #4f8f00;
+    --code-bg: #ece7f6;
+  }
+
+  * { box-sizing: border-box; }
+  html { direction: rtl; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Segoe UI", "Heebo", "Arial Hebrew", Arial, sans-serif;
+    line-height: 1.65;
+    font-size: 1.02rem;
+  }
+  .page {
+    max-width: 54rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+
+  /* ===== כותרת המסמך ===== */
+  header.doc-head {
+    border-block-end: 3px solid var(--pink);
+    padding-block-end: 1.4rem;
+    margin-block-end: 2rem;
+  }
+  .doc-kicker {
+    text-transform: none;
+    letter-spacing: 0.06em;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--pink);
+    margin-block-end: 0.3rem;
+  }
+  h1 {
+    margin: 0 0 0.4rem;
+    font-size: 2.1rem;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.6rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+  .doc-meta b { color: var(--ink); font-weight: 600; }
+
+  /* ===== ניווט ===== */
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 12px;
+    padding: 1rem 1.3rem;
+    margin-block-end: 2.5rem;
+    font-size: 0.93rem;
+  }
+  nav.toc strong { display: block; margin-block-end: 0.4rem; }
+  nav.toc ol {
+    margin: 0;
+    padding-inline-start: 1.2rem;
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+  nav.toc a { color: var(--ink); text-decoration: none; }
+  nav.toc a:hover, nav.toc a:focus-visible { color: var(--pink); text-decoration: underline; }
+
+  /* ===== מבנה מדורים ===== */
+  section { margin-block-end: 3rem; }
+  h2 {
+    font-size: 1.45rem;
+    margin: 0 0 1rem;
+    padding-block-end: 0.35rem;
+    border-block-end: 1.5px solid var(--panel-line);
+    scroll-margin-block-start: 1rem;
+  }
+  h2 .secno { color: var(--pink); margin-inline-end: 0.5rem; font-variant-numeric: tabular-nums; }
+  h3 { font-size: 1.12rem; margin: 1.6rem 0 0.6rem; }
+  h4 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
+  p { margin: 0.5rem 0 0.9rem; }
+  ul, ol { margin: 0.4rem 0 1rem; padding-inline-start: 1.4rem; }
+  li { margin-block-end: 0.3rem; }
+  li::marker { color: var(--pink); }
+
+  strong { font-weight: 700; }
+  code {
+    background: var(--code-bg);
+    border-radius: 6px;
+    padding: 0.1em 0.4em;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 0.88em;
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+
+  /* ===== תגים ===== */
+  .badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 0.1em 0.75em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+  .badge-done { background: var(--done); color: var(--paper); }
+  .badge-open { background: var(--gold); color: var(--paper); }
+  .badge-stage { background: var(--pink); color: var(--paper); margin-inline-start: 0.5rem; }
+
+  /* ===== טבלאות ===== */
+  .tablewrap { overflow-x: auto; margin: 0.8rem 0 1.2rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.94rem;
+  }
+  th, td {
+    border: 1px solid var(--panel-line);
+    padding: 0.55rem 0.8rem;
+    text-align: right;
+    vertical-align: top;
+  }
+  th {
+    background: var(--panel);
+    font-weight: 700;
+  }
+  th.col-admin { background: var(--admin-bg); }
+  th.col-public { background: var(--public-bg); }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ===== כרטיסים ===== */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.9rem;
+    margin: 1rem 0 1.2rem;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+  }
+  .card h4 { margin: 0 0 0.35rem; font-size: 0.98rem; }
+  .card p { margin: 0; font-size: 0.92rem; color: var(--ink-soft); }
+  .card p b, .card p strong { color: var(--ink); }
+
+  /* ===== תרשים ארכיטקטורה ===== */
+  .arch {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    gap: 0.8rem;
+    margin: 1.2rem 0;
+  }
+  .arch-box {
+    border: 2px solid var(--panel-line);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    background: var(--panel);
+    text-align: center;
+  }
+  .arch-box.admin { border-color: var(--green); }
+  .arch-box.public { border-color: var(--pink); }
+  .arch-box h4 { margin: 0 0 0.3rem; }
+  .arch-box p { margin: 0; font-size: 0.86rem; color: var(--ink-soft); }
+  .arch-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    gap: 0.2rem;
+    min-width: 7.5rem;
+    text-align: center;
+  }
+  .arch-arrow { font-size: 1.3rem; color: var(--pink); }
+  .arch-base {
+    grid-column: 1 / -1;
+    border: 2px dashed var(--panel-line);
+    border-radius: 12px;
+    padding: 0.7rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .arch-base b { color: var(--ink); }
+
+  /* ===== ציר זרימה ===== */
+  .flowline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 0.8rem 0 1.2rem;
+    font-size: 0.9rem;
+  }
+  .flowline .step {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    padding: 0.25rem 0.7rem;
+    font-weight: 600;
+  }
+  .flowline .sep { color: var(--pink); font-weight: 700; }
+
+  /* ===== הערות ===== */
+  .note {
+    border-inline-start: 4px solid var(--gold);
+    background: var(--panel);
+    border-radius: 0 10px 10px 0;
+    padding: 0.7rem 1rem;
+    margin: 1rem 0;
+    font-size: 0.94rem;
+  }
+  .note.win { border-inline-start-color: var(--green); }
+  .note b.tag { color: var(--gold); }
+  .note.win b.tag { color: var(--green); }
+
+  footer {
+    margin-block-start: 3rem;
+    padding-block-start: 1rem;
+    border-block-start: 1.5px solid var(--panel-line);
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 640px) {
+    nav.toc ol { columns: 1; }
+    .arch { grid-template-columns: 1fr; }
+    .arch-link { min-width: 0; }
+    .arch-arrow { transform: rotate(90deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="page">
+
+<header class="doc-head">
+  <div class="doc-kicker">פונקט פארקערט · בדיוק אבל הפוך</div>
+  <h1>מסמך אפיון — מערכת ניהול משחק טריוויה מרובה שלבים</h1>
+  <div class="doc-meta">
+    <span>גרסה <b>1.1</b></span>
+    <span>עודכן <b>26.07.2026</b></span>
+    <span>סטטוס <b>POC הושלם ואושר · לפני פיתוח המערכת המלאה</b></span>
+  </div>
+</header>
+
+<nav class="toc">
+  <strong>תוכן העניינים</strong>
+  <ol>
+    <li><a href="#overview">תמצית ועקרונות</a></li>
+    <li><a href="#decisions">החלטות מרכזיות</a></li>
+    <li><a href="#arch">ארכיטקטורה</a></li>
+    <li><a href="#content">ניהול תוכן</a></li>
+    <li><a href="#global">מנגנונים גלובליים</a></li>
+    <li><a href="#stages">מהלך המשחק — ארבעת השלבים</a></li>
+    <li><a href="#edge">מקרי קצה</a></li>
+    <li><a href="#open">שאלות פתוחות</a></li>
+    <li><a href="#roadmap">תוכנית פיתוח וסטטוס</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================== -->
+<section id="overview">
+  <h2><span class="secno">1</span>תמצית ועקרונות</h2>
+  <p>
+    מערכת להפעלת ערב טריוויה חי בן ארבעה שלבים, עם <strong>20 שחקנים</strong> שמצטמצמים בהדרגה עד
+    <strong>מנצח אחד</strong>. המערכת פועלת על <strong>מחשב אחד עם שני מסכים</strong>:
+    מסך ניהול למפעיל, ומסך קהל שמוקרן במקרן. המוצר הסופי הוא <strong>אפליקציית שולחן עבודה</strong>
+    (אלקטרון) — לחיצה כפולה פותחת את שני החלונות אוטומטית, ללא ידע טכני.
+  </p>
+  <div class="cards">
+    <div class="card"><h4>מפעיל לא־טכני</h4><p>כל פעולה בכפתור ברור בעברית. אין טרמינל, אין דפדפן, אין קבצים.</p></div>
+    <div class="card"><h4>אמינות באירוע חי</h4><p>הפסקת חשמל, רענון או סגירה בטעות — המשחק חוזר <b>בדיוק לאותה נקודה</b>.</p></div>
+    <div class="card"><h4>שליטה מלאה למפעיל</h4><p>Undo לכל פעולה, ניקוד ידני בכל רגע, השהיית טיימר, והכרזת מנצח ידנית בלבד.</p></div>
+    <div class="card"><h4>עברית מלאה</h4><p>שני המסכים RTL. עיצוב מסך הקהל בהשראת הלוגו — גרפיטי ורוד/ירוק/צהוב על כהה.</p></div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section id="decisions">
+  <h2><span class="secno">2</span>החלטות מרכזיות</h2>
+  <div class="tablewrap"><table>
+    <tr><th style="width:11rem">נושא</th><th>החלטה</th></tr>
+    <tr><td>סדר פיתוח</td><td>קודם POC בריפו <code>trivia-dual-screen-poc</code> <span class="badge badge-done">הושלם</span> — אחר־כך המערכת המלאה בריפו <code>trivia-event-system</code></td></tr>
+    <tr><td>פריסה פיזית</td><td>מחשב אחד, שני מסכים. ללא שרת וללא רשת</td></tr>
+    <tr><td>מוצר סופי</td><td>אפליקציית אלקטרון — לחיצה כפולה פותחת אדמין על המסך הראשי ומסך קהל במסך מלא על המקרן</td></tr>
+    <tr><td>שפה</td><td>עברית מלאה בשני המסכים</td></tr>
+    <tr><td>הזנת תוכן</td><td><strong>ללא קבצי JSON.</strong> מסכי עריכה מלאים באדמין + ייבוא מקובץ (שמות, שאלות, תיקיית תמונות) + עריכה תוך כדי אירוע</td></tr>
+    <tr><td>סאונד</td><td>חלק מהתכנון מההתחלה: נכון/שגוי, טיימר, חשיפות, ניצחון. כפתור השתקה כללי</td></tr>
+    <tr><td>הכרזת מנצח</td><td>ידנית תמיד, בלחיצת המפעיל</td></tr>
+  </table></div>
+</section>
+
+<!-- ================================================== -->
+<section id="arch">
+  <h2><span class="secno">3</span>ארכיטקטורה</h2>
+
+  <div class="arch">
+    <div class="arch-box admin">
+      <h4>חלון ניהול</h4>
+      <p>מקור האמת היחיד.<br>כל הלוגיקה, הטיימר וההיסטוריה רצים כאן.</p>
+    </div>
+    <div class="arch-link">
+      <span class="arch-arrow">⇐</span>
+      <span>BroadcastChannel<br>מצב מלא בכל שינוי</span>
+      <span class="arch-arrow">⇒</span>
+      <span>SYNC_REQUEST<br>בפתיחה / רענון</span>
+    </div>
+    <div class="arch-box public">
+      <h4>חלון קהל (מקרן)</h4>
+      <p>"ראי" בלבד — מציג את המצב שהתקבל.<br>אפס לוגיקה, אפס כפתורים.</p>
+    </div>
+    <div class="arch-base">
+      <b>אלקטרון:</b> שרת סטטי פנימי על <code>127.0.0.1</code> בפורט קבוע &nbsp;·&nbsp;
+      <b>שמירה:</b> IndexedDB — תוכן, מצב משחק והיסטוריה, אחרי כל פעולה
+    </div>
+  </div>
+
+  <h3>עקרונות</h3>
+  <ul>
+    <li><strong>טכנולוגיות:</strong> React + Vite + TypeScript · Zustand + מנוע Reducer · BroadcastChannel · IndexedDB · אלקטרון + electron-builder.</li>
+    <li><strong>מכונת מצבים אחת:</strong> כל המשחק הוא אובייקט מצב יחיד (מסך נוכחי, שלב, שחקנים, תורות, טיימר, הגדרות). כל לחיצת מפעיל היא "אירוע" שעובר דרך ה־Reducer.</li>
+    <li><strong>Undo מובנה:</strong> לפני כל פעולה נשמר צילום מצב (Snapshot) במחסנית היסטוריה. "חזור" = שחזור הצילום הקודם, כולל ביטול ניקוד. ההיסטוריה נשמרת לדיסק ולכן Undo שורד גם רענון.</li>
+    <li><strong>שרידות:</strong> שמירה ל־IndexedDB אחרי כל פעולה. אחרי קריסה הטיימר חוזר <em>מושהה</em> עם הזמן שנותר — המפעיל לוחץ "המשך" כשהוא מוכן.</li>
+    <li><strong>פורט קבוע באלקטרון:</strong> האחסון בדפדפן קשור לכתובת+פורט; פורט משתנה בין הפעלות היה מוחק את המצב השמור. נלמד ותוקן ב־POC.</li>
+  </ul>
+
+  <div class="note win">
+    <b class="tag">הוכח ב־POC:</b> סנכרון דו־מסכי, טיימר עם השהיה וחסימת כפתורים, ניקוד בזמן אמת, Undo,
+    שרידות מלאה לרענון ולסגירת האפליקציה, עברית RTL, ופתיחה אוטומטית של שני חלונות באלקטרון —
+    נבדקו ב־28 בדיקות אוטומטיות (Playwright) בדפדפן ובתוך אלקטרון.
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section id="content">
+  <h2><span class="secno">4</span>ניהול תוכן</h2>
+  <p>כל התוכן מוזן ומנוהל בתוך האדמין ונשמר במחשב. <strong>אין קבצי JSON ואין עריכה מחוץ למערכת.</strong></p>
+
+  <h3>מסך ניהול שחקנים</h3>
+  <ul>
+    <li>טבלת 20 השחקנים: שם, קבוצה (1–4), ניקוד נוכחי. הוספה, עריכה, מחיקה והעברה בין קבוצות.</li>
+    <li><strong>ייבוא:</strong> הדבקת רשימת שמות (שורה לשם) או קובץ טקסט/CSV, ואז מסך שיוך לקבוצות.</li>
+  </ul>
+
+  <h3>מסך ניהול שאלות</h3>
+  <ul>
+    <li>טאב לכל מאגר: שלב א' · שלב ב' · שלב ג'-מיוחדות · שלב ג'-תמונות · שלב ד'.</li>
+    <li>לכל שאלה: טקסט + תשובה (מוצגת למפעיל בלבד). שאלות תמונה: העלאת תמונה + תשובה + סדר הצגה.</li>
+    <li><strong>ייבוא:</strong> הדבקה / קובץ טקסט לשאלות; בחירת תיקייה או ריבוי קבצים לתמונות (מיון לפי שם קובץ).</li>
+    <li><strong>מונה מלאי:</strong> המערכת מציגה כמה שאלות נדרשות מול כמה קיימות (למשל שלב א': ‎35×4=140‎) ומתריעה על מחסור.</li>
+  </ul>
+
+  <h3>עריכה תוך כדי אירוע</h3>
+  <ul>
+    <li>מסכי העריכה נגישים תמיד, גם באמצע משחק — בלי להשפיע על מסך הקהל.</li>
+    <li>שאלה שנשאלה מסומנת "נוצלה"; עריכתה משפיעה רק קדימה. מחיקת שחקן עם ניקוד — עם אזהרה.</li>
+  </ul>
+</section>
+
+<!-- ================================================== -->
+<section id="global">
+  <h2><span class="secno">5</span>מנגנונים גלובליים</h2>
+  <div class="cards">
+    <div class="card"><h4>ביטול פעולה (Undo)</h4>
+      <p>כפתור "חזור" קבוע. מחזיר שאלה אחת אחורה <b>כולל ביטול הניקוד</b>, או מסך אחד אחורה. עובד בכל שלב, שורד רענון.</p></div>
+    <div class="card"><h4>פאנל ניקוד ידני</h4>
+      <p>קבוע וגלוי בכל שלב. שלבים א'/ג'/ד': ‎±1‎ לכל שחקן. שלב ב': גם לזוג כיישות וגם לכל שחקן. מסתנכרן מיידית לקהל בלי להפריע לזרימה.</p></div>
+    <div class="card"><h4>מסך מעבר (לוגו)</h4>
+      <p>בין שלבים ובכל רגע בלחיצת "הצג לוגו" — מסך הקהל מציג את לוגו התוכנית באנימציה עד "המשך".</p></div>
+    <div class="card"><h4>השהיית טיימר</h4>
+      <p>"השהה" מקפיא את השעון <b>וחוסם את כפתורי נכון/שגוי</b> למניעת טעויות. הקהל רואה שעון קפוא + חיווי "הפסקה". "המשך" ממשיך מאותה נקודה.</p></div>
+    <div class="card"><h4>סאונד</h4>
+      <p>אפקטים: נכון, שגוי, 10 שניות אחרונות, סיום זמן, חשיפת פיינליסטים, ניצחון. קבצים מקומיים + השתקה כללית.</p></div>
+    <div class="card"><h4>איפוס משחק</h4>
+      <p>עם אישור כפול. מוחק את מצב המשחק בלבד — מאגר השחקנים והשאלות נשאר.</p></div>
+  </div>
+</section>
+
+<!-- ================================================== -->
+<section id="stages">
+  <h2><span class="secno">6</span>מהלך המשחק — ארבעת השלבים</h2>
+
+  <div class="flowline">
+    <span class="step">שלב א' · סבב קבוצות · 20 שחקנים</span><span class="sep">←</span>
+    <span class="step">שלב ב' · זוגות · 12</span><span class="sep">←</span>
+    <span class="step">שלב ג' · דו־קרב · 6</span><span class="sep">←</span>
+    <span class="step">שלב ד' · גמר · 3</span><span class="sep">←</span>
+    <span class="step">🏆 מנצח</span>
+  </div>
+
+  <h3>שלב א' — סבב קבוצות <span class="badge badge-stage">4 קבוצות × 5 שחקנים</span></h3>
+  <p>מטרה: צבירת ניקוד אישי ראשוני. כל קבוצה עולה בתורה ועונה על <strong>35 שאלות</strong> בסבב מחזורי קבוע (שחקן 1→5 וחוזר חלילה — 7 שאלות לשחקן).</p>
+  <div class="tablewrap"><table>
+    <tr><th style="width:9rem">שלב בזרימה</th><th class="col-admin">מסך המפעיל</th><th class="col-public">מסך הקהל</th></tr>
+    <tr><td>כניסה</td><td>לוגו השלב + "הצג שחקנים"</td><td>לוגו התוכנית / שלב א'</td></tr>
+    <tr><td>הצגת קבוצה</td><td>שמות 5 השחקנים + "התחל סבב"</td><td>השמות עולים באנימציה עם ניקוד 0</td></tr>
+    <tr><td>מהלך השאלות</td><td>השאלה הנוכחית (+תשובה), מי בתור, "נכון" / "שגוי", "שאלה קודמת", פאנל ניקוד ידני, מונה (12/35)</td><td>השאלה בפונט גדול, השחקן הפעיל מודגש/מהבהב, טבלת ניקוד בצד</td></tr>
+    <tr><td>מענה</td><td>"נכון" = ‎+1‎ ומעבר תור · "שגוי" = מעבר תור בלבד</td><td>ניקוד מתעדכן באנימציה, השאלה מתחלפת, ההדגשה עוברת</td></tr>
+    <tr><td>סיום סבב</td><td>אחרי שאלה 35 — "סיום קבוצה"</td><td>טבלת ניקוד סופית של הקבוצה</td></tr>
+    <tr><td>מעבר קבוצה</td><td>חזרה ללוגו וטעינת הקבוצה הבאה (עד קבוצה 4)</td><td>לוגו מעבר</td></tr>
+  </table></div>
+
+  <h3>שלב ב' — ראש בראש זוגי <span class="badge badge-stage">6 זוגות · 3 מקצים</span></h3>
+  <p>
+    <strong>מעבר אוטומטי:</strong> המערכת מדרגת את 20 השחקנים לפי ניקוד שלב א', מציגה את 12 העולים
+    ומחלקת ל־6 זוגות. המפעיל יכול לערוך את הזוגות ידנית לפני אישור. שוויון בגבול (מקום 12–13) — התרעה ובחירה ידנית.
+  </p>
+  <p>מבנה מקצה (זוג מול זוג, לדוגמה זוג 1 מול זוג 2):</p>
+  <ol>
+    <li><strong>הצגת המתמודדים</strong> — מסך הקהל מציג את שני הזוגות.</li>
+    <li><strong>סבב זוג 1 — 2:00 דקות:</strong> "התחל" מפעיל את השעון והשאלות זורמות. "נכון" = ‎+1‎ לזוג ושאלה הבאה; "שגוי" = שאלה הבאה. השעון נעצר בסיום הזמן או בעצירה ידנית.</li>
+    <li><strong>סבב זוג 2 — 2:00 דקות:</strong> תהליך זהה, שאלות משלו, ניקוד לזוג 2.</li>
+    <li><strong>סיום מקצה:</strong> הצגת הניקוד שצברו שני הזוגות, מעבר למקצה הבא.</li>
+  </ol>
+
+  <h3>שלב ג' — הששייה <span class="badge badge-stage">6 שחקנים · 3 דו־קרבות</span></h3>
+  <p>
+    <strong>מעבר אוטומטי:</strong> 6 בעלי הניקוד האישי הגבוה ביותר, מחולקים ל־3 זוגות דו־קרב (ניתן לעריכה ידנית; שוויון בגבול — התרעה).
+    כל דו־קרב בנוי משני חלקים:
+  </p>
+  <ol>
+    <li><strong>שאלות מיוחדות (ללא זמן):</strong> 4 שאלות לכל שחקן, לסירוגין — 8 סה"כ. "נכון"/"שגוי" מזכה את מי שענה.</li>
+    <li><strong>רצף תמונות (טיימר גלובלי 2:00):</strong> תמונה עולה על מסך הקהל והשחקן שבתורו מזהה אותה. חיווי בולט של מי בתור; "נכון"/"שגוי" מעביר אוטומטית את התור ואת התמונה הבאה.</li>
+  </ol>
+
+  <h3>שלב ד' — הגמר הגדול <span class="badge badge-stage">3 פיינליסטים</span></h3>
+  <div class="flowline">
+    <span class="step">הזנת ניקוד חיצוני</span><span class="sep">←</span>
+    <span class="step">שקלול</span><span class="sep">←</span>
+    <span class="step">חשיפת 3 פיינליסטים</span><span class="sep">←</span>
+    <span class="step">דו־קרב שאלות</span><span class="sep">←</span>
+    <span class="step">הכרזת מנצח</span>
+  </div>
+  <ol>
+    <li><strong>ניקוד חיצוני:</strong> שדות קלט באדמין ל"ניקוד בונוס" (שופטים/מפעיל) לכל שחקן שנותר, ואז "שקלל והצג פיינליסטים".</li>
+    <li><strong>חשיפה:</strong> 3 המובילים (מצטבר + חיצוני) נחשפים על מסך הקהל באנימציה. שוויון — התרעה ובחירה ידנית.</li>
+    <li><strong>דו־קרב משולש:</strong> שאלות לסירוגין א'→ב'→ג', כפתורי "חיובי"/"שלילי", ללא הגבלת זמן — עד גמר השאלות או הכרעה.</li>
+    <li><strong>הכרזת מנצח:</strong> בלחיצת "הכרז מנצח" — קונפטי, זיקוקים, מוזיקת ניצחון ושם המנצח בגדול במרכז מסך הקהל.</li>
+  </ol>
+</section>
+
+<!-- ================================================== -->
+<section id="edge">
+  <h2><span class="secno">7</span>מקרי קצה</h2>
+  <div class="tablewrap"><table>
+    <tr><th style="width:14rem">מקרה</th><th>התנהגות המערכת</th></tr>
+    <tr><td>הפסקת חשמל / רענון / קריסה</td><td>שחזור מלא מהאחסון המקומי: ניקוד, תור, שאלה והיסטוריית Undo. טיימר חוזר מושהה עם הזמן שנותר</td></tr>
+    <tr><td>שוויון במעבר שלב</td><td>התרעה למפעיל + בחירה ידנית מי עולה, או הוספת נקודה מכרעת ידנית</td></tr>
+    <tr><td>מחסור בשאלות</td><td>התרעה מוקדמת במסך העריכה (מונה מלאי) והתרעה בזמן אמת; ניתן להוסיף שאלות תוך כדי אירוע</td></tr>
+    <tr><td>מסך הקהל נסגר בטעות</td><td>פתיחה מחדש מסתנכרנת מיידית למצב הנוכחי (SYNC_REQUEST)</td></tr>
+    <tr><td>לחיצה כפולה מהירה על "נכון"</td><td>הגנת Debounce + "חזור" זמין תמיד</td></tr>
+    <tr><td>שני עותקים של האפליקציה</td><td>העותק השני עולה על פורט חלופי ואינו דורס את מצב המשחק</td></tr>
+  </table></div>
+</section>
+
+<!-- ================================================== -->
+<section id="open">
+  <h2><span class="secno">8</span>שאלות פתוחות <span class="badge badge-open">לא חוסמות פיתוח</span></h2>
+  <ol>
+    <li>
+      <strong>ניקוד זוגי בשלב ב':</strong> האם נקודה שהזוג צובר מתווספת לניקוד האישי של כל אחד מבני הזוג, או נשארת ניקוד זוגי נפרד?
+      משפיע ישירות על בחירת הששייה בשלב ג' (לפי ניקוד <em>אישי</em>).
+      <br><em>פתרון בתכנון:</em> ההתנהגות תהיה הגדרה במערכת שניתן לשנות עד רגע האירוע.
+    </li>
+    <li>
+      <strong>כמות שאלות בגמר:</strong> אין הגבלה קשיחה — הגמר נמשך עד גמר מאגר שלב ד' או עד הכרעה, והמפעיל מסיים ידנית ב"הכרז מנצח".
+    </li>
+  </ol>
+</section>
+
+<!-- ================================================== -->
+<section id="roadmap">
+  <h2><span class="secno">9</span>תוכנית פיתוח וסטטוס</h2>
+  <div class="tablewrap"><table>
+    <tr><th style="width:4rem">שלב</th><th>תוכן</th><th style="width:8rem">סטטוס</th></tr>
+    <tr><td class="num">0</td><td>POC: סנכרון דו־מסכי, טיימר, ניקוד, Undo, שרידות, RTL, עטיפת אלקטרון</td><td><span class="badge badge-done">הושלם ואושר</span></td></tr>
+    <tr><td class="num">1</td><td>תשתית המערכת המלאה: שלד, סנכרון, אחסון, מנוע מצבים והיסטוריה</td><td>הבא בתור</td></tr>
+    <tr><td class="num">2</td><td>ניהול תוכן: מסכי שחקנים ושאלות + ייבוא (שמות, שאלות, תיקיית תמונות)</td><td>—</td></tr>
+    <tr><td class="num">3</td><td>שלב א' מלא + פאנל ניקוד ידני + מסכי מעבר</td><td>—</td></tr>
+    <tr><td class="num">4</td><td>שלב ב' + דירוג וחלוקה לזוגות + טיימר מלא</td><td>—</td></tr>
+    <tr><td class="num">5</td><td>שלב ג': שאלות מיוחדות + רצף תמונות</td><td>—</td></tr>
+    <tr><td class="num">6</td><td>שלב ד' + מסך ניצחון</td><td>—</td></tr>
+    <tr><td class="num">7</td><td>סאונד, אנימציות ועיצוב סופי בהשראת הלוגו</td><td>—</td></tr>
+    <tr><td class="num">8</td><td>אריזה סופית: electron-builder, קובץ התקנה, אייקון, בדיקה על שני מסכים אמיתיים</td><td>—</td></tr>
+    <tr><td class="num">9</td><td>חזרה גנרלית: משחק מלא מדומה מקצה לקצה + תיקונים</td><td>—</td></tr>
+  </table></div>
+  <p>כל שלב מסתיים בקומיט, הדגמה ואישור לפני המשך.</p>
+</section>
+
+<footer>
+  מסמך אפיון · פרויקט פונקט פארקערט · הגרסה המחייבת נמצאת בריפו <code>trivia-event-system</code> בקובץ <code>docs/SPEC.html</code>
+</footer>
+
+</div>
+</html>
