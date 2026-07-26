@@ -10,8 +10,8 @@
   height: auto;
   display: block;
 }
-.logo-small .logo-image { max-height: 3rem; }
-.logo-medium .logo-image { max-height: 10rem; }
+.logo-small .logo-image { max-height: 10rem; }
+.logo-medium .logo-image { max-height: 15rem; }
 .logo-hero .logo-image { max-height: min(52vh, 30rem); }
 
 /* ===== גרסת CSS (כשאין קובץ לוגו) ===== */
