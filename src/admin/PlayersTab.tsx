@@ -7,9 +7,23 @@ import { GROUP_IDS, type GroupId } from '../core/types';
  * ניהול שחקנים — גרסה ראשונית: הוספה ידנית, ייבוא מרשימה, שיוך לקבוצות ומחיקה.
  * (מסך הייבוא המלא עם קבצים ותמונות — בשלב הפיתוח הבא של ניהול התוכן.)
  */
+/** זיהוי שורת כותרת קבוצה בייבוא: "קבוצה 1:" / "קבוצה א':" וכדומה */
+const GROUP_TOKENS: Record<string, GroupId> = {
+  '1': 'g1', 'א': 'g1',
+  '2': 'g2', 'ב': 'g2',
+  '3': 'g3', 'ג': 'g3',
+  '4': 'g4', 'ד': 'g4',
+};
+
+function parseGroupHeader(line: string): GroupId | null {
+  const m = line.match(/^קבוצה\s*([1-4אבגד])['׳]?\s*:?\s*$/);
+  return m ? GROUP_TOKENS[m[1]] : null;
+}
+
 export default function PlayersTab() {
   const { content, updateContent } = useAdminStore();
   const [newName, setNewName] = useState('');
+  const [newGroup, setNewGroup] = useState<GroupId | ''>('g1');
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -24,23 +38,23 @@ export default function PlayersTab() {
   }
 
   function importList() {
-    const names = importText
+    // שורת "קבוצה X:" קובעת את הקבוצה לכל השמות שאחריה; שמות לפניה — ללא קבוצה
+    const lines = importText
       .split('\n')
       .map((s) => s.trim())
       .filter(Boolean);
-    if (names.length === 0) return;
-    updateContent((c) => ({
-      ...c,
-      players: [
-        ...c.players,
-        // שיבוץ אוטומטי: ממלאים קבוצות לפי הסדר, 5 בכל קבוצה
-        ...names.map((name, i) => {
-          const existing = c.players.length + i;
-          const groupId = existing < 20 ? GROUP_IDS[Math.floor(existing / 5)] : null;
-          return { id: newId('p'), name, groupId };
-        }),
-      ],
-    }));
+    let currentGroup: GroupId | null = null;
+    const newPlayers: { id: string; name: string; groupId: GroupId | null }[] = [];
+    for (const line of lines) {
+      const header = parseGroupHeader(line);
+      if (header) {
+        currentGroup = header;
+      } else {
+        newPlayers.push({ id: newId('p'), name: line, groupId: currentGroup });
+      }
+    }
+    if (newPlayers.length === 0) return;
+    updateContent((c) => ({ ...c, players: [...c.players, ...newPlayers] }));
     setImportText('');
     setShowImport(false);
   }
@@ -72,15 +86,28 @@ export default function PlayersTab() {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                addPlayer(newName);
+                addPlayer(newName, newGroup || null);
                 setNewName('');
               }
             }}
           />
+          <select
+            className="input select"
+            value={newGroup}
+            onChange={(e) => setNewGroup(e.target.value as GroupId | '')}
+            title="הקבוצה שאליה יתווסף השחקן"
+          >
+            {GROUP_IDS.map((g, i) => (
+              <option key={g} value={g}>
+                קבוצה {i + 1}
+              </option>
+            ))}
+            <option value="">ללא קבוצה</option>
+          </select>
           <button
             className="btn btn-primary"
             onClick={() => {
-              addPlayer(newName);
+              addPlayer(newName, newGroup || null);
               setNewName('');
             }}
           >
@@ -112,16 +139,21 @@ export default function PlayersTab() {
 
         {showImport && (
           <div className="import-box">
-            <p className="hint">הדביקו רשימת שמות — שם בכל שורה. השיבוץ לקבוצות אוטומטי (5 בקבוצה) וניתן לשינוי.</p>
+            <p className="hint">
+              שם בכל שורה. שורת <code>קבוצה 1:</code> (או <code>קבוצה א':</code>) משבצת את כל השמות
+              שאחריה לאותה קבוצה. שמות לפני כותרת ראשונה יישארו ללא קבוצה.
+            </p>
             <textarea
               className="input textarea"
-              rows={6}
+              rows={8}
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
-              placeholder={'אברהם כהן\nיוסף לוי\n…'}
+              placeholder={"קבוצה א':\nחיים ישראל\nמשה לוי\nקבוצה ב':\nדוד כהן\n…"}
             />
             <button className="btn btn-primary" onClick={importList}>
-              ייבא {importText.split('\n').filter((s) => s.trim()).length} שמות
+              ייבא{' '}
+              {importText.split('\n').filter((s) => s.trim() && !parseGroupHeader(s.trim())).length}{' '}
+              שמות
             </button>
           </div>
         )}
