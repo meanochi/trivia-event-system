@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAdminStore } from '../core/adminStore';
 import { newId } from '../core/format';
 import { GROUP_IDS, type GroupId } from '../core/types';
@@ -12,6 +12,7 @@ export default function PlayersTab() {
   const [newName, setNewName] = useState('');
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function addPlayer(name: string, groupId: GroupId | null = null) {
     const trimmed = name.trim();
@@ -88,6 +89,25 @@ export default function PlayersTab() {
           <button className="btn" onClick={() => setShowImport((v) => !v)}>
             📋 ייבוא רשימה
           </button>
+          <button className="btn" onClick={() => fileRef.current?.click()}>
+            📄 מקובץ
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".txt,.csv,text/plain"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) {
+                void f.text().then((t) => {
+                  setImportText(t);
+                  setShowImport(true);
+                });
+              }
+              e.target.value = '';
+            }}
+          />
         </div>
 
         {showImport && (
