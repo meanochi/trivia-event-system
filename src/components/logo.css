@@ -1,0 +1,87 @@
+.logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.logo-small .logo-image { max-height: 3rem; }
+.logo-medium .logo-image { max-height: 10rem; }
+.logo-hero .logo-image { max-height: min(52vh, 30rem); }
+
+/* ===== גרסת CSS (כשאין קובץ לוגו) ===== */
+.logo-css {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+}
+
+.logo-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.92;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.logo-line {
+  color: #fff;
+  -webkit-text-stroke: 0.045em #1b0f35;
+  text-shadow:
+    0.05em 0.06em 0 #1b0f35,
+    0 0 24px rgba(255, 47, 160, 0.65),
+    0 0 60px rgba(255, 47, 160, 0.3);
+  transform: rotate(-2deg);
+}
+.logo-line:nth-child(2) {
+  transform: rotate(1.5deg);
+  text-shadow:
+    0.05em 0.06em 0 #1b0f35,
+    0 0 24px rgba(155, 228, 0, 0.55),
+    0 0 60px rgba(155, 228, 0, 0.3);
+}
+
+.logo-banner {
+  font-family: var(--font-display);
+  background: linear-gradient(90deg, var(--pink), var(--yellow) 55%, var(--green));
+  color: #1b0f35;
+  padding: 0.12em 1.1em 0.16em;
+  border-radius: 0.35em;
+  transform: rotate(-1.5deg);
+  box-shadow: 0 0.15em 0 #1b0f35, var(--glow-yellow);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* גדלים */
+.logo-small .logo-line { font-size: 1.5rem; }
+.logo-small .logo-banner { font-size: 0.72rem; }
+.logo-small .logo-title { flex-direction: row; gap: 0.35em; }
+
+.logo-medium .logo-line { font-size: 4rem; }
+.logo-medium .logo-banner { font-size: 1.5rem; }
+
+.logo-hero .logo-line { font-size: min(16vw, 11rem); }
+.logo-hero .logo-banner { font-size: min(5vw, 3.4rem); }
+
+/* ===== סימני שאלה מרחפים ===== */
+.logo-marks {
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+}
+.logo-mark {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 700;
+  opacity: 0.9;
+  text-shadow: 0.04em 0.05em 0 #1b0f35, 0 0 18px currentColor;
+  animation: float-soft 3.6s ease-in-out infinite;
+}

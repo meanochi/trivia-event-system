@@ -1,0 +1,143 @@
+/* ===== פונקט פארקערט — מערכת עיצוב =====
+   בהשראת הלוגו: גרפיטי ניאון — ורוד, ירוק, צהוב על סגול-לילה עמוק */
+
+@import '@fontsource/karantina/400.css';
+@import '@fontsource/karantina/700.css';
+@import '@fontsource/heebo/400.css';
+@import '@fontsource/heebo/500.css';
+@import '@fontsource/heebo/700.css';
+@import '@fontsource/heebo/900.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* רקעים */
+  --night: #17102b;
+  --night-2: #211640;
+  --panel: #2a1d4e;
+  --panel-line: #453370;
+
+  /* ניאון הלוגו */
+  --pink: #ff2fa0;
+  --pink-soft: #ff6fc0;
+  --green: #9be400;
+  --green-soft: #c3f24e;
+  --yellow: #ffe300;
+
+  /* טקסט */
+  --text: #f7f4ff;
+  --muted: #b3a8d6;
+
+  /* פונטים */
+  --font-display: 'Karantina', 'Heebo', sans-serif;
+  --font-body: 'Heebo', 'Segoe UI', Arial, sans-serif;
+
+  /* זוהר */
+  --glow-pink: 0 0 18px rgba(255, 47, 160, 0.55);
+  --glow-green: 0 0 18px rgba(155, 228, 0, 0.45);
+  --glow-yellow: 0 0 18px rgba(255, 227, 0, 0.45);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--night);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 70% -10%, rgba(255, 47, 160, 0.12), transparent),
+    radial-gradient(ellipse 70% 50% at 20% 110%, rgba(155, 228, 0, 0.08), transparent);
+  color: var(--text);
+  direction: rtl;
+  overflow-x: hidden;
+}
+
+/* ===== כפתורים ===== */
+.btn {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.55em 1.2em;
+  border-radius: 12px;
+  border: 2px solid var(--panel-line);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.08s, box-shadow 0.15s, opacity 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: #142400;
+  font-weight: 800;
+}
+.btn-primary:hover:not(:disabled) { box-shadow: var(--glow-green); }
+.btn-pink {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+  font-weight: 800;
+}
+.btn-pink:hover:not(:disabled) { box-shadow: var(--glow-pink); }
+.btn-warning {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #3a3000;
+  font-weight: 800;
+}
+.btn-outline-pink { border-color: var(--pink); color: var(--pink-soft); }
+.btn-outline-yellow { border-color: var(--yellow); color: var(--yellow); }
+.btn-danger { background: #e02020; border-color: #e02020; color: #fff; }
+.btn-danger-outline { border-color: #e02020; color: #ff8a8a; }
+.btn-mini { font-size: 0.85rem; padding: 0.2em 0.7em; border-radius: 8px; }
+
+/* ===== פאנלים ===== */
+.panel {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--panel-line);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.02em;
+  color: var(--yellow);
+}
+
+/* ===== אנימציות משותפות ===== */
+@keyframes blink { 50% { opacity: 0.45; } }
+@keyframes pulse { 50% { opacity: 0.55; } }
+@keyframes bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.55); color: var(--green); }
+  100% { transform: scale(1); }
+}
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50% { transform: translateY(-12px) rotate(var(--rot, 0deg)); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+}
