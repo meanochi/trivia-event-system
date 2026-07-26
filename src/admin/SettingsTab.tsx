@@ -1,7 +1,5 @@
 import { useAdminStore } from '../core/adminStore';
 
-const MINUTE = 60 * 1000;
-
 export default function SettingsTab() {
   const { game, dispatch } = useAdminStore();
   const { settings } = game;
@@ -11,25 +9,36 @@ export default function SettingsTab() {
       <h2 className="section-title">הגדרות</h2>
 
       <label className="setting-row">
-        <span>סאונד</span>
+        <span>אפקטים קוליים</span>
         <button
           className={`btn ${settings.soundEnabled ? 'btn-primary' : ''}`}
           onClick={() => dispatch({ type: 'UPDATE_SETTINGS', patch: { soundEnabled: !settings.soundEnabled } })}
         >
-          {settings.soundEnabled ? '🔊 פעיל' : '🔇 מושתק'}
+          {settings.soundEnabled ? '🔊 פעילים' : '🔇 מושתקים'}
         </button>
       </label>
 
       <label className="setting-row">
-        <span>משך סבב גמר לכל מתמודד</span>
+        <span>מוזיקת רקע (זמינה בכל שלבי המשחק)</span>
+        <button
+          className={`btn ${settings.musicPlaying ? 'btn-primary' : ''}`}
+          onClick={() => dispatch({ type: 'UPDATE_SETTINGS', patch: { musicPlaying: !settings.musicPlaying } })}
+        >
+          {settings.musicPlaying ? '🎵 מתנגנת' : '⏹ כבויה'}
+        </button>
+        <span className="hint">נגן המוזיקה עצמו (קבצים ועוצמה) ייבנה בשלב הסאונד.</span>
+      </label>
+
+      <label className="setting-row">
+        <span>מספר פיינליסטים בגמר</span>
         <span className="setting-options">
-          {[2, 3].map((min) => (
+          {([2, 3] as const).map((n) => (
             <button
-              key={min}
-              className={`btn ${settings.finaleRoundMs === min * MINUTE ? 'btn-primary' : ''}`}
-              onClick={() => dispatch({ type: 'UPDATE_SETTINGS', patch: { finaleRoundMs: min * MINUTE } })}
+              key={n}
+              className={`btn ${settings.finalistCount === n ? 'btn-primary' : ''}`}
+              onClick={() => dispatch({ type: 'UPDATE_SETTINGS', patch: { finalistCount: n } })}
             >
-              {min}:00 דקות
+              {n} שחקנים
             </button>
           ))}
         </span>

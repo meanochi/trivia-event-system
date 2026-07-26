@@ -14,6 +14,8 @@ export function initialGameState(): GameState {
     timer: { totalMs: DEFAULT_TIMER_MS, remainingMs: DEFAULT_TIMER_MS, status: 'idle' },
     settings: {
       soundEnabled: true,
+      musicPlaying: false,
+      finalistCount: 2,
       finaleRoundMs: 2 * 60 * 1000,
       pairRoundMs: 2 * 60 * 1000,
       imageRoundMs: 2 * 60 * 1000,

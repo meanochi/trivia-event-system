@@ -77,7 +77,11 @@ export type PublicScreen =
 
 export interface GameSettings {
   soundEnabled: boolean;
-  /** משך סבב גמר לכל מתמודד (2:00, אפשרות 3:00) */
+  /** מוזיקת רקע — זמינה בכל שלבי המשחק, כולל בזמן השאלות */
+  musicPlaying: boolean;
+  /** מספר הפיינליסטים בגמר (2 ברירת מחדל, אפשרות ל-3) */
+  finalistCount: 2 | 3;
+  /** משך סבב גמר לכל מתמודד */
   finaleRoundMs: number;
   /** משך סבב זוג בראש בראש */
   pairRoundMs: number;
