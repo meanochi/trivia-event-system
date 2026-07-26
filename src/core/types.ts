@@ -73,7 +73,28 @@ export interface PairState {
 /** המסך המוצג כרגע על מסך הקהל */
 export type PublicScreen =
   | { kind: 'logo'; subtitle?: string }
-  | { kind: 'stage-title'; stage: StageId };
+  | { kind: 'stage-title'; stage: StageId }
+  | { kind: 'stageA-intro'; groupId: GroupId }
+  | { kind: 'stageA-question' }
+  | { kind: 'stageA-summary'; groupId: GroupId };
+
+// ===== שלב א' — הסיבוב המהיר =====
+
+export interface StageARun {
+  groupId: GroupId;
+  /** חברי הקבוצה בסדר התורות */
+  playerIds: string[];
+  /** השאלות שהוקצו לסבב (עד 35, לפי סדר המאגר) */
+  questionIds: string[];
+  /** כמה שאלות כבר נענו */
+  answered: number;
+  phase: 'intro' | 'playing' | 'summary';
+}
+
+export interface StageAState {
+  completedGroups: GroupId[];
+  run: StageARun | null;
+}
 
 export interface GameSettings {
   soundEnabled: boolean;
@@ -96,6 +117,7 @@ export interface GameState {
   activeStage: StageId;
   scores: Record<string, PlayerScore>;
   pairs: PairState[];
+  stageA: StageAState;
   timer: TimerState;
   settings: GameSettings;
 }
@@ -111,6 +133,10 @@ export type GameAction =
   | { type: 'MANUAL_ADJUST_PLAYER'; playerId: string; delta: number }
   | { type: 'MANUAL_ADJUST_PAIR'; pairId: string; delta: number }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<GameSettings> }
+  | { type: 'STAGE_A_LOAD_GROUP'; groupId: GroupId; playerIds: string[]; questionIds: string[] }
+  | { type: 'STAGE_A_START' }
+  | { type: 'STAGE_A_ANSWER'; correct: boolean }
+  | { type: 'STAGE_A_FINISH_GROUP' }
   | { type: 'TIMER_START'; totalMs?: number }
   | { type: 'TIMER_PAUSE' }
   | { type: 'TIMER_RESUME' }
@@ -119,10 +145,12 @@ export type GameAction =
 
 // ===== סנכרון בין החלונות =====
 
-/** המצב המלא שמסך הקהל צריך כדי לרנדר — נשלח בכל שינוי */
+/** המצב המלא שמסך הקהל צריך כדי לרנדר — נשלח בכל שינוי.
+ *  הקהל לעולם אינו מקבל תשובות — רק את טקסט השאלה הנוכחית. */
 export interface DisplaySnapshot {
   game: GameState;
   players: Player[];
+  questionText: string | null;
 }
 
 export type SyncMessage =

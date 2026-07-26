@@ -1,6 +1,7 @@
 import { useAdminStore } from '../core/adminStore';
 import { STAGE_NAMES, type StageId } from '../core/types';
 import ScorePanel from './ScorePanel';
+import StageAPanel from './StageAPanel';
 
 const STAGES: StageId[] = ['A', 'B', 'C', 'D'];
 const STAGE_LETTERS: Record<StageId, string> = { A: 'א', B: 'ב', C: 'ג', D: 'ד' };
@@ -13,17 +14,27 @@ export default function GameTab() {
   const { game, dispatch } = useAdminStore();
   const screen = game.publicScreen;
 
+  function screenLabel(): string {
+    switch (screen.kind) {
+      case 'logo':
+        return 'לוגו התוכנית';
+      case 'stage-title':
+        return `כותרת שלב — ${STAGE_NAMES[screen.stage]}`;
+      case 'stageA-intro':
+        return 'הצגת קבוצה';
+      case 'stageA-question':
+        return 'שאלה — הסיבוב המהיר';
+      case 'stageA-summary':
+        return 'סיכום קבוצה';
+    }
+  }
+
   return (
     <div className="game-tab">
       <section className="panel">
         <h2 className="section-title">מסך הקהל</h2>
         <p className="hint">
-          מוצג כעת:{' '}
-          <strong>
-            {screen.kind === 'logo'
-              ? 'לוגו התוכנית'
-              : `כותרת שלב — ${STAGE_NAMES[screen.stage]}`}
-          </strong>
+          מוצג כעת: <strong>{screenLabel()}</strong>
         </p>
         <div className="screen-controls">
           <button
@@ -49,15 +60,16 @@ export default function GameTab() {
         </div>
       </section>
 
-      <section className="panel stage-placeholder">
-        <h2 className="section-title">
-          שלב {STAGE_LETTERS[game.activeStage]}' — {STAGE_NAMES[game.activeStage]}
-        </h2>
-        <p className="hint">
-          מהלך המשחק של השלב ייבנה בשלב הפיתוח הבא. בינתיים ניתן לנהל את מסך הקהל, את התוכן
-          (בטאבים שחקנים ושאלות) ואת הניקוד הידני.
-        </p>
-      </section>
+      {game.activeStage === 'A' ? (
+        <StageAPanel />
+      ) : (
+        <section className="panel stage-placeholder">
+          <h2 className="section-title">
+            שלב {STAGE_LETTERS[game.activeStage]}' — {STAGE_NAMES[game.activeStage]}
+          </h2>
+          <p className="hint">מהלך המשחק של השלב ייבנה בשלב הפיתוח הבא.</p>
+        </section>
+      )}
 
       <ScorePanel />
     </div>
