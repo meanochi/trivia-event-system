@@ -1,6 +1,7 @@
 import AdminApp from './admin/AdminApp';
 import DisplayApp from './display/DisplayApp';
 import Logo from './components/Logo';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function Launcher() {
   return (
@@ -23,7 +24,17 @@ function Launcher() {
 
 export default function App() {
   const path = window.location.pathname;
-  if (path.startsWith('/admin')) return <AdminApp />;
-  if (path.startsWith('/display')) return <DisplayApp />;
+  if (path.startsWith('/admin'))
+    return (
+      <ErrorBoundary>
+        <AdminApp />
+      </ErrorBoundary>
+    );
+  if (path.startsWith('/display'))
+    return (
+      <ErrorBoundary>
+        <DisplayApp />
+      </ErrorBoundary>
+    );
   return <Launcher />;
 }

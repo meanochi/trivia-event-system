@@ -1,6 +1,6 @@
 import type { GameAction, GameState, PlayerScore } from './types';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const DEFAULT_TIMER_MS = 2 * 60 * 1000;
 
@@ -21,6 +21,31 @@ export function initialGameState(): GameState {
       pairRoundMs: 2 * 60 * 1000,
       imageRoundMs: 2 * 60 * 1000,
     },
+  };
+}
+
+/**
+ * מיגרציה של מצב שנשמר בגרסה ישנה של הקוד: כל שדה חסר מקבל ברירת מחדל.
+ * קריטי לעדכוני גרסה — בלי זה, מצב ישן ב-IndexedDB מפיל את האדמין למסך ריק.
+ */
+export function migrateGameState(raw: unknown): GameState {
+  const base = initialGameState();
+  if (!raw || typeof raw !== 'object') return base;
+  const r = raw as Partial<GameState>;
+  return {
+    ...base,
+    ...r,
+    schemaVersion: SCHEMA_VERSION,
+    publicScreen: r.publicScreen ?? base.publicScreen,
+    activeStage: r.activeStage ?? base.activeStage,
+    scores: r.scores ?? base.scores,
+    pairs: r.pairs ?? base.pairs,
+    stageA: {
+      completedGroups: r.stageA?.completedGroups ?? [],
+      run: r.stageA?.run ?? null,
+    },
+    timer: { ...base.timer, ...(r.timer ?? {}) },
+    settings: { ...base.settings, ...(r.settings ?? {}) },
   };
 }
 

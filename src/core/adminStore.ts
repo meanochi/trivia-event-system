@@ -6,7 +6,13 @@ import type {
   GameState,
   SyncMessage,
 } from './types';
-import { gameReducer, initialGameState, isUndoable, stageACurrentQuestionId } from './reducer';
+import {
+  gameReducer,
+  initialGameState,
+  isUndoable,
+  migrateGameState,
+  stageACurrentQuestionId,
+} from './reducer';
 import { clearGame, loadContent, loadGame, saveContent, saveGame } from './db';
 
 /**
@@ -100,8 +106,9 @@ export async function restoreAdminState(): Promise<void> {
   const content = persistedContent ?? EMPTY_CONTENT;
   let game = initialGameState();
   if (persistedGame) {
-    history = persistedGame.history ?? [];
-    game = persistedGame.state;
+    // מיגרציה: מצב (והיסטוריית Undo) שנשמרו בגרסת קוד ישנה מקבלים ברירות מחדל לשדות חדשים
+    history = (persistedGame.history ?? []).map(migrateGameState);
+    game = migrateGameState(persistedGame.state);
     if (game.timer.status === 'running') {
       game = { ...game, timer: { ...game.timer, status: 'paused' } };
     }

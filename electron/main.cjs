@@ -92,6 +92,13 @@ async function createWindows() {
   displayWin.setMenuBarVisibility(false);
   await displayWin.loadURL(`${base}/display`);
 
+  // F12 פותח כלי פיתוח (לאבחון תקלות בשטח)
+  for (const win of [adminWin, displayWin]) {
+    win.webContents.on('before-input-event', (_e, input) => {
+      if (input.type === 'keyDown' && input.key === 'F12') win.webContents.toggleDevTools();
+    });
+  }
+
   // סגירת חלון האדמין סוגרת את כל האפליקציה (מסך הקהל לבד חסר משמעות)
   adminWin.on('closed', () => app.quit());
 }
