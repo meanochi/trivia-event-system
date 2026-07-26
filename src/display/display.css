@@ -63,3 +63,152 @@
   inset-inline-start: 1.6rem;
   opacity: 0.85;
 }
+
+/* ===== שלב א' — הצגת קבוצה ===== */
+.group-title {
+  font-family: var(--font-display);
+  font-size: min(9vw, 6.5rem);
+  color: #fff;
+  -webkit-text-stroke: 0.03em #1b0f35;
+  text-shadow: 0.04em 0.05em 0 #1b0f35, 0 0 40px rgba(255, 227, 0, 0.45);
+}
+.intro-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+  max-width: 80vw;
+}
+.intro-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--panel);
+  border: 2px solid var(--pink);
+  border-radius: 18px;
+  padding: 1.4rem 2rem;
+  box-shadow: var(--glow-pink);
+  animation: pop-in 0.55s backwards;
+}
+.intro-card-name {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: #fff;
+}
+.intro-card-score {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== שלב א' — מסך שאלה ===== */
+.stagea-layout {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr minmax(18rem, 24vw);
+  grid-template-areas:
+    'top top'
+    'main scores';
+  gap: 1.5rem;
+}
+.stagea-top {
+  grid-area: top;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stagea-counter {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.stagea-main {
+  grid-area: main;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2rem;
+}
+.display-question {
+  font-size: min(6.5vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  animation: pop-in 0.4s;
+}
+.stagea-scores {
+  grid-area: scores;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.8rem;
+}
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--panel);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 0.8rem 1.1rem;
+  font-size: 1.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.score-row.active {
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+  background: #2d2154;
+}
+.score-row.active .score-row-name {
+  color: var(--green-soft);
+  font-weight: 800;
+  animation: pulse 1.3s infinite;
+}
+.score-row-value {
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== שלב א' — סיכום ===== */
+.summary-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: min(80vw, 34rem);
+}
+.summary-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  background: var(--panel);
+  border: 2px solid var(--panel-line);
+  border-radius: 14px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1.7rem;
+  animation: pop-in 0.5s backwards;
+}
+.summary-row.advancing {
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+}
+.summary-rank {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--pink-soft);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.summary-row.advancing .summary-rank { color: var(--green-soft); }
+.summary-name { font-weight: 700; }
+.summary-score {
+  font-weight: 900;
+  font-size: 1.9rem;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}

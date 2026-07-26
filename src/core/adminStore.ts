@@ -6,7 +6,7 @@ import type {
   GameState,
   SyncMessage,
 } from './types';
-import { gameReducer, initialGameState, isUndoable } from './reducer';
+import { gameReducer, initialGameState, isUndoable, stageACurrentQuestionId } from './reducer';
 import { clearGame, loadContent, loadGame, saveContent, saveGame } from './db';
 
 /**
@@ -33,7 +33,9 @@ let history: GameState[] = [];
 const EMPTY_CONTENT: ContentState = { players: [], questions: [] };
 
 function snapshotOf(game: GameState, content: ContentState): DisplaySnapshot {
-  return { game, players: content.players };
+  const questionId = stageACurrentQuestionId(game);
+  const question = questionId ? content.questions.find((q) => q.id === questionId) : null;
+  return { game, players: content.players, questionText: question?.text ?? null };
 }
 
 export const useAdminStore = create<AdminStore>((set, get) => {
@@ -105,7 +107,7 @@ export async function restoreAdminState(): Promise<void> {
     }
   }
   useAdminStore.setState({ game, content, historyLength: history.length, loaded: true });
-  channel.postMessage({ type: 'STATE', snapshot: { game, players: content.players } } satisfies SyncMessage);
+  channel.postMessage({ type: 'STATE', snapshot: snapshotOf(game, content) } satisfies SyncMessage);
   if (persistedGame) void saveGame({ state: game, history });
 }
 
@@ -114,10 +116,7 @@ channel.addEventListener('message', (e: MessageEvent<SyncMessage>) => {
   if (e.data?.type === 'SYNC_REQUEST') {
     const { game, content, loaded } = useAdminStore.getState();
     if (loaded) {
-      channel.postMessage({
-        type: 'STATE',
-        snapshot: { game, players: content.players },
-      } satisfies SyncMessage);
+      channel.postMessage({ type: 'STATE', snapshot: snapshotOf(game, content) } satisfies SyncMessage);
     }
   }
 });

@@ -11,6 +11,7 @@ export function initialGameState(): GameState {
     activeStage: 'A',
     scores: {},
     pairs: [],
+    stageA: { completedGroups: [], run: null },
     timer: { totalMs: DEFAULT_TIMER_MS, remainingMs: DEFAULT_TIMER_MS, status: 'idle' },
     settings: {
       soundEnabled: true,
@@ -37,10 +38,25 @@ export function isUndoable(action: GameAction): boolean {
   switch (action.type) {
     case 'MANUAL_ADJUST_PLAYER':
     case 'MANUAL_ADJUST_PAIR':
+    case 'STAGE_A_ANSWER':
       return true;
     default:
       return false;
   }
+}
+
+/** מזהה השאלה הנוכחית בסבב שלב א' (null אם אין סבב פעיל או שנגמרו) */
+export function stageACurrentQuestionId(state: GameState): string | null {
+  const run = state.stageA.run;
+  if (!run || run.phase !== 'playing') return null;
+  return run.questionIds[run.answered] ?? null;
+}
+
+/** השחקן שבתורו בסבב שלב א' */
+export function stageAActivePlayerId(state: GameState): string | null {
+  const run = state.stageA.run;
+  if (!run || run.playerIds.length === 0) return null;
+  return run.playerIds[run.answered % run.playerIds.length];
 }
 
 function withPlayerScore(
@@ -75,6 +91,59 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.patch } };
+
+    case 'STAGE_A_LOAD_GROUP': {
+      const run = {
+        groupId: action.groupId,
+        playerIds: action.playerIds,
+        questionIds: action.questionIds,
+        answered: 0,
+        phase: 'intro' as const,
+      };
+      return {
+        ...state,
+        activeStage: 'A',
+        stageA: { ...state.stageA, run },
+        publicScreen: { kind: 'stageA-intro', groupId: action.groupId },
+      };
+    }
+
+    case 'STAGE_A_START': {
+      const run = state.stageA.run;
+      if (!run || run.phase !== 'intro') return state;
+      return {
+        ...state,
+        stageA: { ...state.stageA, run: { ...run, phase: 'playing' } },
+        publicScreen: { kind: 'stageA-question' },
+      };
+    }
+
+    case 'STAGE_A_ANSWER': {
+      const run = state.stageA.run;
+      if (!run || run.phase !== 'playing' || run.answered >= run.questionIds.length) return state;
+      const playerId = stageAActivePlayerId(state);
+      let next = state;
+      if (action.correct && playerId) {
+        next = withPlayerScore(state, playerId, (s) => ({ ...s, stageA: s.stageA + 1 }));
+      }
+      return {
+        ...next,
+        stageA: { ...next.stageA, run: { ...run, answered: run.answered + 1 } },
+      };
+    }
+
+    case 'STAGE_A_FINISH_GROUP': {
+      const run = state.stageA.run;
+      if (!run) return state;
+      const completedGroups = state.stageA.completedGroups.includes(run.groupId)
+        ? state.stageA.completedGroups
+        : [...state.stageA.completedGroups, run.groupId];
+      return {
+        ...state,
+        stageA: { completedGroups, run: { ...run, phase: 'summary' } },
+        publicScreen: { kind: 'stageA-summary', groupId: run.groupId },
+      };
+    }
 
     case 'TIMER_START': {
       if (state.timer.status === 'running') return state;

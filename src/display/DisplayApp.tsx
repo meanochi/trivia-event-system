@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { DisplaySnapshot, SyncMessage } from '../core/types';
 import { STAGE_NAMES } from '../core/types';
 import Logo from '../components/Logo';
+import { StageAIntro, StageAQuestion, StageASummary } from './StageAScreens';
 import './display.css';
 
 /**
@@ -41,6 +42,10 @@ export default function DisplayApp() {
       </div>
     );
   }
+
+  if (screen.kind === 'stageA-intro') return <StageAIntro snapshot={snapshot} groupId={screen.groupId} />;
+  if (screen.kind === 'stageA-question') return <StageAQuestion snapshot={snapshot} />;
+  if (screen.kind === 'stageA-summary') return <StageASummary snapshot={snapshot} groupId={screen.groupId} />;
 
   // stage-title — כותרת שלב
   return (
