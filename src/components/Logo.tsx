@@ -52,7 +52,7 @@ export default function Logo({ size = 'medium', decorations = false }: LogoProps
 
       {imageOk ? (
         <img
-          src="/assets/logo.png"
+          src={`${import.meta.env.BASE_URL}assets/logo.png`}
           alt="פונקט פארקערט"
           className="logo-image"
           onError={() => setImageOk(false)}
