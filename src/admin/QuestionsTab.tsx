@@ -256,10 +256,36 @@ function QuestionRow({ question }: { question: Question }) {
 
 /* ===== מאגר תמונות (חזיון תעתועים) ===== */
 
+/** קריאת קבצים מגרירת תיקייה/קבצים (כולל תיקיות מקוננות) */
+async function filesFromDrop(dt: DataTransfer): Promise<File[]> {
+  const out: File[] = [];
+  const entries = [...dt.items]
+    .map((i) => i.webkitGetAsEntry?.())
+    .filter(Boolean) as FileSystemEntry[];
+  async function walk(entry: FileSystemEntry): Promise<void> {
+    if (entry.isFile) {
+      const file = await new Promise<File>((res, rej) => (entry as FileSystemFileEntry).file(res, rej));
+      out.push(file);
+    } else if (entry.isDirectory) {
+      const reader = (entry as FileSystemDirectoryEntry).createReader();
+      let batch: FileSystemEntry[];
+      do {
+        batch = await new Promise<FileSystemEntry[]>((res, rej) => reader.readEntries(res, rej));
+        for (const e of batch) await walk(e);
+      } while (batch.length > 0);
+    }
+  }
+  for (const e of entries) await walk(e);
+  if (out.length === 0) out.push(...dt.files);
+  return out;
+}
+
 function ImagePool({ pool }: { pool: PoolInfo }) {
   const { content, updateContent } = useAdminStore();
   const fileRef = useRef<HTMLInputElement>(null);
+  const folderRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   const questions = content.questions
     .filter((q) => q.kind === pool.kind)
@@ -314,6 +340,9 @@ function ImagePool({ pool }: { pool: PoolInfo }) {
         <button className="btn btn-primary" onClick={() => fileRef.current?.click()} disabled={busy}>
           {busy ? 'מעלה…' : '🖼 העלאת תמונות'}
         </button>
+        <button className="btn" onClick={() => folderRef.current?.click()} disabled={busy}>
+          📁 העלאת תיקייה שלמה
+        </button>
         <input
           ref={fileRef}
           type="file"
@@ -327,15 +356,42 @@ function ImagePool({ pool }: { pool: PoolInfo }) {
             if (files.length) void addFiles(files);
           }}
         />
-        <span className="hint">אפשר לבחור קבצים מרובים בבת אחת (או תיקייה שלמה בגרירה)</span>
+        <input
+          ref={folderRef}
+          type="file"
+          hidden
+          {...({ webkitdirectory: '' } as object)}
+          onChange={(e) => {
+            const files = e.target.files ? [...e.target.files] : [];
+            e.target.value = '';
+            if (files.length) void addFiles(files);
+          }}
+        />
+        <span className="hint">או פשוט גררו תיקייה/קבצים לכאן 👇</span>
       </div>
 
-      <div className="image-grid">
+      <div
+        className={`image-grid drop-zone ${dragOver ? 'drag-over' : ''}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          void filesFromDrop(e.dataTransfer).then((files) => {
+            if (files.length) void addFiles(files);
+          });
+        }}
+      >
         {questions.map((q, i) => (
           <ImageCard key={q.id} question={q} index={i + 1} />
         ))}
+        {questions.length === 0 && (
+          <p className="hint drop-hint">אין עדיין תמונות — העלו בכפתורים למעלה או גררו לכאן תיקייה שלמה.</p>
+        )}
       </div>
-      {questions.length === 0 && <p className="hint">אין עדיין תמונות — העלו למעלה.</p>}
     </section>
   );
 }

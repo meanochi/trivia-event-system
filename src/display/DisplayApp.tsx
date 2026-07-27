@@ -29,16 +29,56 @@ import './display.css';
 /**
  * מסך הקהל — "ראי" בלבד: מקבל snapshot מלא מהאדמין ומרנדר.
  */
+/** משך השהיית המסך אחרי חיווי תשובה — נותן לקהל לראות את ה-✔/✘ */
+const ANSWER_HOLD_MS = 1400;
+
 export default function DisplayApp() {
   const [snapshot, setSnapshot] = useState<DisplaySnapshot | null>(null);
 
   useEffect(() => {
     const channel = new BroadcastChannel('funkt-farkert-sync');
+    // השהיית מעבר אחרי תשובה: כשמגיע צליל נכון/שגוי (במסכים ללא טיימר רץ),
+    // עדכוני המצב הבאים נאגרים ומוחלים רק אחרי שהחיווי הסתיים.
+    let latest: DisplaySnapshot | null = null;
+    let holdUntil = 0;
+    let pending: DisplaySnapshot | null = null;
+    let applyTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const apply = (s: DisplaySnapshot) => {
+      latest = s;
+      setSnapshot(s);
+    };
+
     channel.addEventListener('message', (e: MessageEvent<SyncMessage>) => {
-      if (e.data?.type === 'STATE') setSnapshot(e.data.snapshot);
+      if (e.data?.type === 'STATE') {
+        const now = Date.now();
+        if (now < holdUntil) {
+          pending = e.data.snapshot;
+          if (!applyTimer) {
+            applyTimer = setTimeout(() => {
+              applyTimer = null;
+              if (pending) {
+                apply(pending);
+                pending = null;
+              }
+            }, holdUntil - now);
+          }
+        } else {
+          apply(e.data.snapshot);
+        }
+      }
+      if (e.data?.type === 'SOUND' && (e.data.name === 'correct' || e.data.name === 'wrong')) {
+        // בסבבים מתוזמנים הקצב חשוב — לא משהים
+        if (latest?.game.timer.status !== 'running') {
+          holdUntil = Date.now() + ANSWER_HOLD_MS;
+        }
+      }
     });
     channel.postMessage({ type: 'SYNC_REQUEST' } satisfies SyncMessage);
-    return () => channel.close();
+    return () => {
+      if (applyTimer) clearTimeout(applyTimer);
+      channel.close();
+    };
   }, []);
 
   return (

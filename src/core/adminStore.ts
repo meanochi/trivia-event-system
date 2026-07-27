@@ -88,16 +88,17 @@ export const useAdminStore = create<AdminStore>((set, get) => {
       const next = gameReducer(prev, action);
       if (next === prev) return;
       if (isUndoable(action)) history.push(prev);
+      // הצליל נשלח לפני עדכון המצב — כך מסך הקהל מספיק להציג את החיווי
+      // על השאלה הנוכחית ולהשהות את המעבר לשאלה הבאה
+      if (next.settings.soundEnabled) {
+        const sound = soundForAction(action);
+        if (sound) channel.postMessage({ type: 'SOUND', name: sound } satisfies SyncMessage);
+      }
       // טיקים נשמרים לדיסק לכל היותר פעם בשנייה
       const persist =
         action.type !== 'TICK' ||
         Math.floor(prev.timer.remainingMs / 1000) !== Math.floor(next.timer.remainingMs / 1000);
       commitGame(next, persist);
-      // אפקט קולי מתאים — מושמע בחלון מסך הקהל
-      if (next.settings.soundEnabled) {
-        const sound = soundForAction(action);
-        if (sound) channel.postMessage({ type: 'SOUND', name: sound } satisfies SyncMessage);
-      }
     },
 
     undo() {

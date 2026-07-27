@@ -22,7 +22,7 @@ export default function AnswerFlash() {
 
   useEffect(() => {
     if (!flash) return;
-    const t = setTimeout(() => setFlash(null), 900);
+    const t = setTimeout(() => setFlash(null), 1400);
     return () => clearTimeout(t);
   }, [flash]);
 

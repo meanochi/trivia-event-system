@@ -76,62 +76,81 @@ export function playEffect(name: SoundName): void {
     const c = ac();
     switch (name) {
       case 'correct':
-        // סטינגר עולה מנצח — שלוש פעימות מהירות + נצנוץ
-        tone(c, { freq: 659, dur: 0.09, type: 'triangle', vol: 0.3 });
-        tone(c, { freq: 880, at: 0.07, dur: 0.09, type: 'triangle', vol: 0.32 });
-        tone(c, { freq: 1318, at: 0.14, dur: 0.3, type: 'triangle', vol: 0.34 });
-        tone(c, { freq: 2637, at: 0.16, dur: 0.22, type: 'sine', vol: 0.12 });
+        // סטינגר מנצח מלא: ריצה עולה + אקורד מוחזק עם נצנוץ
+        tone(c, { freq: 659, dur: 0.1, type: 'triangle', vol: 0.3 });
+        tone(c, { freq: 880, at: 0.08, dur: 0.1, type: 'triangle', vol: 0.32 });
+        tone(c, { freq: 1318, at: 0.16, dur: 0.55, type: 'triangle', vol: 0.34 });
+        tone(c, { freq: 1661, at: 0.16, dur: 0.55, type: 'triangle', vol: 0.2 });
+        tone(c, { freq: 659, at: 0.16, dur: 0.6, type: 'sine', vol: 0.22 });
+        tone(c, { freq: 2637, at: 0.2, dur: 0.4, type: 'sine', vol: 0.13 });
+        tone(c, { freq: 3322, at: 0.3, dur: 0.35, type: 'sine', vol: 0.08 });
         break;
       case 'wrong':
-        // צורם ומתוח — שני מתנדים צורמים יורדים יחד
-        tone(c, { freq: 196, dur: 0.42, type: 'sawtooth', vol: 0.2, sweepTo: 98 });
-        tone(c, { freq: 208, dur: 0.42, type: 'sawtooth', vol: 0.2, sweepTo: 104 });
-        tone(c, { freq: 98, at: 0.02, dur: 0.4, type: 'triangle', vol: 0.18, sweepTo: 55 });
+        // צורם, כבד וארוך — נפילה דרמטית
+        tone(c, { freq: 220, dur: 0.65, type: 'sawtooth', vol: 0.22, sweepTo: 92 });
+        tone(c, { freq: 233, dur: 0.65, type: 'sawtooth', vol: 0.22, sweepTo: 98 });
+        tone(c, { freq: 110, at: 0.03, dur: 0.7, type: 'triangle', vol: 0.24, sweepTo: 50 });
+        tone(c, { freq: 55, at: 0.05, dur: 0.75, type: 'sine', vol: 0.28, sweepTo: 38 });
         break;
       case 'tick':
-        tone(c, { freq: 1050, dur: 0.045, type: 'square', vol: 0.12 });
+        tone(c, { freq: 1050, dur: 0.045, type: 'square', vol: 0.14 });
         break;
       case 'timeup':
-        // בום עמוק + אזעקה משולשת — סוף זמן דרמטי
-        tone(c, { freq: 90, dur: 1.0, type: 'sine', vol: 0.4, sweepTo: 45 });
-        [0, 0.22, 0.44].forEach((at) => {
-          tone(c, { freq: 466, at, dur: 0.16, type: 'square', vol: 0.2 });
-          tone(c, { freq: 622, at, dur: 0.16, type: 'square', vol: 0.14 });
+        // בום אדיר + אזעקה משולשת מתמשכת
+        tone(c, { freq: 85, dur: 1.4, type: 'sine', vol: 0.45, sweepTo: 40 });
+        tone(c, { freq: 170, dur: 0.8, type: 'sawtooth', vol: 0.15, sweepTo: 60 });
+        [0, 0.25, 0.5].forEach((at, i) => {
+          tone(c, { freq: 466, at, dur: 0.2, type: 'square', vol: 0.22 - i * 0.03 });
+          tone(c, { freq: 622, at, dur: 0.2, type: 'square', vol: 0.16 - i * 0.03 });
         });
         break;
       case 'reveal':
-        [523, 659, 784, 1046].forEach((f, i) =>
-          tone(c, { freq: f, at: i * 0.11, dur: 0.28, type: 'triangle', vol: 0.26 }),
+        // פנפרת חשיפה מלאה — ריצה ארוכה עם הד ואקורד סיום
+        [523, 659, 784, 1046, 1318, 1568].forEach((f, i) =>
+          tone(c, { freq: f, at: i * 0.1, dur: 0.3, type: 'triangle', vol: 0.26 }),
         );
+        [523, 659, 784].forEach((f, i) =>
+          tone(c, { freq: f, at: 0.14 + i * 0.1, dur: 0.22, type: 'sine', vol: 0.1 }),
+        );
+        tone(c, { freq: 1046, at: 0.65, dur: 0.7, type: 'triangle', vol: 0.28 });
+        tone(c, { freq: 1318, at: 0.65, dur: 0.7, type: 'triangle', vol: 0.22 });
+        tone(c, { freq: 2093, at: 0.7, dur: 0.6, type: 'sine', vol: 0.12 });
         break;
       case 'question':
-        // "פופ" קצר לשאלה חדשה
-        tone(c, { freq: 540, dur: 0.09, type: 'triangle', vol: 0.18, sweepTo: 940 });
+        // הכרזת שאלה — פופ עולה + פעמון
+        tone(c, { freq: 440, dur: 0.12, type: 'triangle', vol: 0.2, sweepTo: 880 });
+        tone(c, { freq: 1760, at: 0.1, dur: 0.3, type: 'sine', vol: 0.12 });
         break;
       case 'player':
-        // צליל תור/הופעת שחקן — פעמון כפול עדין
-        tone(c, { freq: 988, dur: 0.09, type: 'sine', vol: 0.14 });
-        tone(c, { freq: 1319, at: 0.07, dur: 0.14, type: 'sine', vol: 0.14 });
+        // הופעת שחקן/תור — שלישיית פעמונים
+        tone(c, { freq: 784, dur: 0.1, type: 'sine', vol: 0.15 });
+        tone(c, { freq: 988, at: 0.08, dur: 0.1, type: 'sine', vol: 0.16 });
+        tone(c, { freq: 1319, at: 0.16, dur: 0.28, type: 'sine', vol: 0.17 });
         break;
       case 'whoosh': {
-        // מעבר מסך — רעש מסונן בסחיפה
-        const dur = 0.4;
+        // מעבר מסך מרענן: סחיפה עולה + שני פעמונים בהירים
+        const dur = 0.5;
         const t0 = c.currentTime;
         const buffer = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
         const data = buffer.getChannelData(0);
-        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+        for (let i = 0; i < data.length; i++) {
+          const p = i / data.length;
+          data[i] = (Math.random() * 2 - 1) * Math.sin(p * Math.PI);
+        }
         const src = c.createBufferSource();
         src.buffer = buffer;
         const bp = c.createBiquadFilter();
         bp.type = 'bandpass';
-        bp.Q.value = 1.2;
-        bp.frequency.setValueAtTime(400, t0);
-        bp.frequency.exponentialRampToValueAtTime(3200, t0 + dur * 0.7);
+        bp.Q.value = 1.4;
+        bp.frequency.setValueAtTime(700, t0);
+        bp.frequency.exponentialRampToValueAtTime(5200, t0 + dur * 0.8);
         const g = c.createGain();
-        g.gain.setValueAtTime(0.22, t0);
+        g.gain.setValueAtTime(0.16, t0);
         g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
         src.connect(bp).connect(g).connect(c.destination);
         src.start(t0);
+        tone(c, { freq: 1046, at: 0.16, dur: 0.2, type: 'sine', vol: 0.15 });
+        tone(c, { freq: 1568, at: 0.28, dur: 0.35, type: 'sine', vol: 0.16 });
         break;
       }
       case 'winner':
@@ -160,14 +179,15 @@ export function playTimerBeat(progress: number, urgent: boolean): void {
   window.__lastSound = 'beat';
   try {
     const c = ac();
-    const vol = 0.05 + progress * 0.2;
-    const freq = 130 + progress * 50;
-    // פעימה ראשית — "תוף לב"
-    tone(c, { freq, dur: 0.1, type: 'sine', vol, sweepTo: freq * 0.6 });
+    const vol = 0.16 + progress * 0.22;
+    const freq = 140 + progress * 60;
+    // פעימה ראשית — "תוף לב" + טיק מתכתי שנשמע תמיד
+    tone(c, { freq, dur: 0.12, type: 'sine', vol, sweepTo: freq * 0.55 });
+    tone(c, { freq: 1150, at: 0.01, dur: 0.04, type: 'square', vol: 0.08 + progress * 0.08 });
     if (urgent) {
-      // דופק כפול + טיק מתכתי — מתח שיא
-      tone(c, { freq: freq * 1.1, at: 0.14, dur: 0.08, type: 'sine', vol: vol * 0.8, sweepTo: freq * 0.7 });
-      tone(c, { freq: 1250, at: 0.02, dur: 0.04, type: 'square', vol: 0.14 });
+      // דופק כפול מהיר + טיק גבוה — מתח שיא
+      tone(c, { freq: freq * 1.12, at: 0.16, dur: 0.1, type: 'sine', vol: vol * 0.9, sweepTo: freq * 0.6 });
+      tone(c, { freq: 1450, at: 0.17, dur: 0.05, type: 'square', vol: 0.16 });
     }
   } catch {
     // אודיו לא זמין
@@ -179,7 +199,7 @@ export function playTimerBeat(progress: number, urgent: boolean): void {
 let musicGain: GainNode | null = null;
 let musicInterval: ReturnType<typeof setInterval> | null = null;
 
-/** לולאת רקע עדינה בסולם מינורי — עד שיוחלף בקובץ מוזיקה אמיתי */
+/** לולאת רקע סוערת ואנרגטית — קצב דוחף, בס פועם, מתופים ואקורדים */
 export function startGenerativeMusic(volume: number): void {
   stopGenerativeMusic();
   window.__musicOn = true;
@@ -189,47 +209,81 @@ export function startGenerativeMusic(volume: number): void {
     musicGain.gain.value = volume;
     const lowpass = c.createBiquadFilter();
     lowpass.type = 'lowpass';
-    lowpass.frequency.value = 2400;
+    lowpass.frequency.value = 4200;
     musicGain.connect(lowpass).connect(c.destination);
 
-    // Am פנטטוני: A C D E G
-    const scale = [220, 262, 294, 330, 392];
-    const bass = [110, 98, 87, 98];
-    let step = 0;
-    let bar = 0;
+    // לופ אקורדים אנרגטי: Am → F → C → G (תיבה לכל אקורד, 8 צעדים לתיבה)
+    const CHORDS = [
+      { bass: 110, notes: [220, 262, 330, 440] },
+      { bass: 87.3, notes: [175, 220, 262, 349] },
+      { bass: 130.8, notes: [262, 330, 392, 523] },
+      { bass: 98, notes: [196, 247, 294, 392] },
+    ];
+    const STEP = 0.165; // ~180 פעימות שמיניות בדקה — דוחף
 
+    function noiseBurst(t: number, dur: number, vol: number, highpass = 5000) {
+      if (!musicGain) return;
+      const buf = c.createBuffer(1, Math.ceil(c.sampleRate * dur), c.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      const hp = c.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = highpass;
+      const g = c.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      src.connect(hp).connect(g).connect(musicGain);
+      src.start(t);
+    }
+
+    function note(t: number, freq: number, dur: number, vol: number, type: OscillatorType = 'triangle') {
+      if (!musicGain) return;
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g).connect(musicGain);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    }
+
+    let step = 0;
     const playStep = () => {
       if (!musicGain) return;
       const t = c.currentTime;
-      if (step % 8 === 0) {
-        // בס בתחילת כל תיבה
-        const b = c.createOscillator();
-        const bg = c.createGain();
-        b.type = 'sine';
-        b.frequency.value = bass[bar % bass.length];
-        bg.gain.setValueAtTime(0.5, t);
-        bg.gain.exponentialRampToValueAtTime(0.001, t + 1.9);
-        b.connect(bg).connect(musicGain);
-        b.start(t);
-        b.stop(t + 2);
-        bar++;
+      const bar = Math.floor(step / 8) % CHORDS.length;
+      const inBar = step % 8;
+      const chord = CHORDS[bar];
+
+      // בס פועם בכל צעד — המנוע של האנרגיה
+      note(t, chord.bass, 0.16, inBar % 2 === 0 ? 0.5 : 0.34, 'sawtooth');
+      note(t, chord.bass / 2, 0.18, 0.3, 'sine');
+
+      // "היי-האט" בכל צעד, מודגש באוף-ביט
+      noiseBurst(t, 0.04, inBar % 2 === 1 ? 0.14 : 0.07);
+
+      // "סנר" על 2 ו-4
+      if (inBar === 2 || inBar === 6) noiseBurst(t, 0.12, 0.2, 1800);
+
+      // ליד — ארפג'יו מתרוצץ עם קפיצות אוקטבה
+      const seq = [0, 2, 1, 3, 2, 0, 3, 1];
+      const lead = chord.notes[seq[inBar]] * (inBar === 3 || inBar === 7 ? 2 : 1);
+      note(t, lead, 0.22, 0.16);
+
+      // סטאב אקורד בתחילת כל תיבה
+      if (inBar === 0) {
+        chord.notes.forEach((f) => note(t, f, 0.3, 0.1, 'square'));
       }
-      const note = scale[(step * 3 + bar) % scale.length] * (step % 4 === 2 ? 2 : 1);
-      const o = c.createOscillator();
-      const g = c.createGain();
-      o.type = 'triangle';
-      o.frequency.value = note;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.16, t + 0.03);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
-      o.connect(g).connect(musicGain);
-      o.start(t);
-      o.stop(t + 0.5);
       step++;
     };
 
     playStep();
-    musicInterval = setInterval(playStep, 250);
+    musicInterval = setInterval(playStep, STEP * 1000);
   } catch {
     // אודיו לא זמין
   }

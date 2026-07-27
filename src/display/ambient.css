@@ -89,7 +89,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: answer-fade 0.9s ease-out forwards;
+  animation: answer-fade 1.4s ease-out forwards;
 }
 .answer-flash.correct {
   background: radial-gradient(ellipse at center, rgba(155, 228, 0, 0.22), transparent 70%);
@@ -102,7 +102,7 @@
 .answer-flash-icon {
   font-size: min(30vw, 16rem);
   font-weight: 900;
-  animation: answer-icon-pop 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  animation: answer-icon-pop 1.4s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
 }
 .answer-flash.correct .answer-flash-icon {
   color: var(--green);
