@@ -5,6 +5,9 @@
 // בדיוק כמו בדפדפן (אותו origin לשני החלונות).
 
 const { app, BrowserWindow, screen } = require('electron');
+
+// מוזיקה ואפקטים מתנגנים אוטומטית בלי מחוות משתמש (מדיניות autoplay)
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');

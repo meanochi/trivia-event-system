@@ -171,6 +171,10 @@ export interface GameSettings {
   soundEnabled: boolean;
   /** מוזיקת רקע — זמינה בכל שלבי המשחק, כולל בזמן השאלות */
   musicPlaying: boolean;
+  /** עוצמת מוזיקת הרקע (0–1) */
+  musicVolume: number;
+  /** קובץ מוזיקה שהועלה (מזהה ב-IndexedDB); null = הלחן המובנה */
+  musicTrackId: string | null;
   /** מספר הפיינליסטים בגמר (2 ברירת מחדל, אפשרות ל-3) */
   finalistCount: 2 | 3;
   /** משך סבב גמר לכל מתמודד */
@@ -252,4 +256,5 @@ export interface DisplaySnapshot {
 
 export type SyncMessage =
   | { type: 'STATE'; snapshot: DisplaySnapshot }
-  | { type: 'SYNC_REQUEST' };
+  | { type: 'SYNC_REQUEST' }
+  | { type: 'SOUND'; name: 'correct' | 'wrong' | 'tick' | 'timeup' | 'reveal' | 'winner' };

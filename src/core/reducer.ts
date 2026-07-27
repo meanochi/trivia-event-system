@@ -18,6 +18,8 @@ export function initialGameState(): GameState {
     settings: {
       soundEnabled: true,
       musicPlaying: false,
+      musicVolume: 0.35,
+      musicTrackId: null,
       finalistCount: 2,
       finaleRoundMs: 2 * 60 * 1000,
       pairRoundMs: 2 * 60 * 1000,

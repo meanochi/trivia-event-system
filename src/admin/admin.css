@@ -563,3 +563,11 @@
   flex-wrap: wrap;
 }
 .setting-options { display: flex; gap: 0.4rem; }
+.volume-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.volume-label input[type='range'] { accent-color: var(--pink); width: 9rem; }

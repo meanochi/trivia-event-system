@@ -38,6 +38,24 @@ let history: GameState[] = [];
 
 const EMPTY_CONTENT: ContentState = { players: [], questions: [] };
 
+function soundForAction(action: GameAction): 'correct' | 'wrong' | 'reveal' | 'winner' | null {
+  switch (action.type) {
+    case 'STAGE_A_ANSWER':
+    case 'STAGE_B_ANSWER':
+    case 'STAGE_C_ANSWER':
+    case 'STAGE_D_ANSWER':
+      return action.correct ? 'correct' : 'wrong';
+    case 'STAGE_B_SETUP':
+    case 'STAGE_C_SETUP':
+    case 'STAGE_D_SETUP':
+      return 'reveal';
+    case 'STAGE_D_DECLARE_WINNER':
+      return 'winner';
+    default:
+      return null;
+  }
+}
+
 function snapshotOf(game: GameState, content: ContentState): DisplaySnapshot {
   const questionId = currentQuestionId(game);
   const question = questionId ? content.questions.find((q) => q.id === questionId) : null;
@@ -75,6 +93,11 @@ export const useAdminStore = create<AdminStore>((set, get) => {
         action.type !== 'TICK' ||
         Math.floor(prev.timer.remainingMs / 1000) !== Math.floor(next.timer.remainingMs / 1000);
       commitGame(next, persist);
+      // אפקט קולי מתאים — מושמע בחלון מסך הקהל
+      if (next.settings.soundEnabled) {
+        const sound = soundForAction(action);
+        if (sound) channel.postMessage({ type: 'SOUND', name: sound } satisfies SyncMessage);
+      }
     },
 
     undo() {

@@ -21,6 +21,7 @@ import {
   StageDSummary,
   StageDWinner,
 } from './StageDScreens';
+import SoundManager from './SoundManager';
 import './display.css';
 
 /**
@@ -38,6 +39,15 @@ export default function DisplayApp() {
     return () => channel.close();
   }, []);
 
+  return (
+    <>
+      <SoundManager snapshot={snapshot} />
+      <Screen snapshot={snapshot} />
+    </>
+  );
+}
+
+function Screen({ snapshot }: { snapshot: DisplaySnapshot | null }) {
   if (!snapshot) {
     return (
       <div className="display-screen center">
