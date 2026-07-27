@@ -25,9 +25,24 @@ export default function StageAPanel() {
 
   function GroupPicker() {
     const unusedQuestions = content.questions.filter((q) => q.kind === 'stageA' && !q.used);
+    const allDone = game.stageA.completedGroups.length >= GROUP_IDS.length;
     return (
       <section className="panel">
         <h2 className="section-title">הסיבוב המהיר — בחירת קבוצה</h2>
+        {allDone && (
+          <div className="next-stage-box">
+            <span>🎉 כל ארבע הקבוצות סיימו!</span>
+            <button
+              className="btn btn-pink btn-big"
+              onClick={() => {
+                dispatch({ type: 'SET_ACTIVE_STAGE', stage: 'B' });
+                dispatch({ type: 'SHOW_STAGE_TITLE', stage: 'B' });
+              }}
+            >
+              ⬅ המשך לשלב ב' — ראש בראש
+            </button>
+          </div>
+        )}
         <p className="hint">
           במאגר {unusedQuestions.length} שאלות פנויות ·{' '}
           {unusedQuestions.length < QUESTIONS_PER_GROUP && (
@@ -139,8 +154,20 @@ export default function StageAPanel() {
           </div>
         ) : (
           <>
-            <div className="turn-line">
-              בתור: <strong className="active-player-name">{activePlayer?.name ?? '—'}</strong>
+            <div className="turn-picker">
+              <span className="hint">בתור (לחיצה על שם מעבירה את התור):</span>
+              {run!.playerIds.map((id, i) => {
+                const p = content.players.find((pp) => pp.id === id);
+                return (
+                  <button
+                    key={id}
+                    className={`turn-chip ${p?.id === activePlayer?.id ? 'active' : ''}`}
+                    onClick={() => dispatch({ type: 'STAGE_A_SET_TURN', turnIdx: i })}
+                  >
+                    {p?.name ?? '—'}
+                  </button>
+                );
+              })}
             </div>
             <div className="admin-question">{question?.text ?? '—'}</div>
             {question?.answer && <div className="admin-answer">תשובה: {question.answer}</div>}

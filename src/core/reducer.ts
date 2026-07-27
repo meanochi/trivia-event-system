@@ -45,10 +45,22 @@ export function migrateGameState(raw: unknown): GameState {
     scores: r.scores ?? base.scores,
     stageA: {
       completedGroups: r.stageA?.completedGroups ?? [],
-      run: r.stageA?.run ?? null,
+      run: r.stageA?.run
+        ? {
+            ...r.stageA.run,
+            // מצב ישן ללא turnIdx — נגזר ממספר התשובות
+            turnIdx:
+              r.stageA.run.turnIdx ??
+              (r.stageA.run.answered ?? 0) % Math.max(1, r.stageA.run.playerIds?.length ?? 1),
+          }
+        : null,
     },
     stageB: { ...emptyStageB(), ...(r.stageB ?? {}) },
-    stageC: { ...emptyStageC(), ...(r.stageC ?? {}) },
+    stageC: {
+      ...emptyStageC(),
+      ...(r.stageC ?? {}),
+      activeSlot: (r.stageC?.activeSlot ?? (r.stageC?.answeredInPart ?? 0) % 2) as 0 | 1,
+    },
     stageD: { ...emptyStageD(), ...(r.stageD ?? {}) },
     timer: { ...base.timer, ...(r.timer ?? {}) },
     settings: { ...base.settings, ...(r.settings ?? {}) },
@@ -77,6 +89,7 @@ export function emptyStageC() {
     specialCursor: 0,
     imageCursor: 0,
     answeredInPart: 0,
+    activeSlot: 0 as const,
   };
 }
 
@@ -161,7 +174,7 @@ export function stageCActivePlayerId(state: GameState): string | null {
   if (c.phase !== 'special' && c.phase !== 'images') return null;
   const duel = c.duels[c.duelIndex];
   if (!duel || duel.length === 0) return null;
-  return duel[c.answeredInPart % 2];
+  return duel[c.activeSlot];
 }
 
 /** מזהה השאלה הנוכחית בסבב הגמר */
@@ -199,7 +212,7 @@ export function stageACurrentQuestionId(state: GameState): string | null {
 export function stageAActivePlayerId(state: GameState): string | null {
   const run = state.stageA.run;
   if (!run || run.playerIds.length === 0) return null;
-  return run.playerIds[run.answered % run.playerIds.length];
+  return run.playerIds[run.turnIdx % run.playerIds.length];
 }
 
 function withPlayerScore(
@@ -241,6 +254,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         playerIds: action.playerIds,
         questionIds: action.questionIds,
         answered: 0,
+        turnIdx: 0,
         phase: 'intro' as const,
       };
       return {
@@ -271,7 +285,23 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
       return {
         ...next,
-        stageA: { ...next.stageA, run: { ...run, answered: run.answered + 1 } },
+        stageA: {
+          ...next.stageA,
+          run: {
+            ...run,
+            answered: run.answered + 1,
+            turnIdx: (run.turnIdx + 1) % Math.max(1, run.playerIds.length),
+          },
+        },
+      };
+    }
+
+    case 'STAGE_A_SET_TURN': {
+      const run = state.stageA.run;
+      if (!run || run.phase !== 'playing') return state;
+      return {
+        ...state,
+        stageA: { ...state.stageA, run: { ...run, turnIdx: action.turnIdx % Math.max(1, run.playerIds.length) } },
       };
     }
 
@@ -394,7 +424,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (c.phase !== 'intro') return state;
       return {
         ...state,
-        stageC: { ...c, phase: 'special', answeredInPart: 0 },
+        stageC: { ...c, phase: 'special', answeredInPart: 0, activeSlot: 0 },
         publicScreen: { kind: 'stageC-special' },
       };
     }
@@ -415,6 +445,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             ...c,
             specialCursor: c.specialCursor + 1,
             answeredInPart: c.answeredInPart + 1,
+            activeSlot: c.activeSlot === 0 ? 1 : 0,
           },
         };
       }
@@ -433,10 +464,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             ...c,
             imageCursor: c.imageCursor + 1,
             answeredInPart: c.answeredInPart + 1,
+            activeSlot: c.activeSlot === 0 ? 1 : 0,
           },
         };
       }
       return state;
+    }
+
+    case 'STAGE_C_SET_TURN': {
+      const c = state.stageC;
+      if (c.phase !== 'special' && c.phase !== 'images') return state;
+      return { ...state, stageC: { ...c, activeSlot: action.slot } };
     }
 
     case 'STAGE_C_START_IMAGES': {
@@ -445,7 +483,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const totalMs = state.settings.imageRoundMs;
       return {
         ...state,
-        stageC: { ...c, phase: 'images', answeredInPart: 0 },
+        stageC: { ...c, phase: 'images', answeredInPart: 0, activeSlot: 0 },
         timer: { totalMs, remainingMs: totalMs, status: 'running' },
         publicScreen: { kind: 'stageC-image' },
       };

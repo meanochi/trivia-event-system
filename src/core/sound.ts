@@ -3,7 +3,16 @@
  * מושמע בחלון מסך הקהל (המחובר להגברה).
  */
 
-export type SoundName = 'correct' | 'wrong' | 'tick' | 'timeup' | 'reveal' | 'winner';
+export type SoundName =
+  | 'correct'
+  | 'wrong'
+  | 'tick'
+  | 'timeup'
+  | 'reveal'
+  | 'winner'
+  | 'question'
+  | 'player'
+  | 'whoosh';
 
 let ctx: AudioContext | null = null;
 
@@ -85,6 +94,36 @@ export function playEffect(name: SoundName): void {
           tone(c, { freq: f, at: i * 0.11, dur: 0.28, type: 'triangle', vol: 0.26 }),
         );
         break;
+      case 'question':
+        // "פופ" קצר לשאלה חדשה
+        tone(c, { freq: 540, dur: 0.09, type: 'triangle', vol: 0.18, sweepTo: 940 });
+        break;
+      case 'player':
+        // צליל תור/הופעת שחקן — פעמון כפול עדין
+        tone(c, { freq: 988, dur: 0.09, type: 'sine', vol: 0.14 });
+        tone(c, { freq: 1319, at: 0.07, dur: 0.14, type: 'sine', vol: 0.14 });
+        break;
+      case 'whoosh': {
+        // מעבר מסך — רעש מסונן בסחיפה
+        const dur = 0.4;
+        const t0 = c.currentTime;
+        const buffer = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+        const src = c.createBufferSource();
+        src.buffer = buffer;
+        const bp = c.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.Q.value = 1.2;
+        bp.frequency.setValueAtTime(400, t0);
+        bp.frequency.exponentialRampToValueAtTime(3200, t0 + dur * 0.7);
+        const g = c.createGain();
+        g.gain.setValueAtTime(0.22, t0);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+        src.connect(bp).connect(g).connect(c.destination);
+        src.start(t0);
+        break;
+      }
       case 'winner':
         // פנפרה: שלוש פעימות + סיום גבוה, בשתי שכבות
         [523, 523, 523, 784].forEach((f, i) =>

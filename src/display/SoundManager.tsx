@@ -6,6 +6,7 @@ import {
   startGenerativeMusic,
   stopGenerativeMusic,
 } from '../core/sound';
+import { stageAActivePlayerId, stageCActivePlayerId } from '../core/reducer';
 import { loadImage } from '../core/db';
 
 /**
@@ -19,14 +20,47 @@ export default function SoundManager({ snapshot }: { snapshot: DisplaySnapshot |
   const enabledRef = useRef(soundEnabled);
   enabledRef.current = soundEnabled;
 
-  // אפקטים מהאדמין
+  // אפקטים מהאדמין (נכון/שגוי/חשיפה/ניצחון) — עדיפות עליונה
+  const lastAdminSoundRef = useRef(0);
   useEffect(() => {
     const channel = new BroadcastChannel('funkt-farkert-sync');
     channel.addEventListener('message', (e: MessageEvent<SyncMessage>) => {
-      if (e.data?.type === 'SOUND' && enabledRef.current) playEffect(e.data.name);
+      if (e.data?.type === 'SOUND' && enabledRef.current) {
+        lastAdminSoundRef.current = Date.now();
+        playEffect(e.data.name);
+      }
     });
     return () => channel.close();
   }, []);
+
+  // צלילים נגזרים ממצב המשחק: מעבר מסך, שאלה חדשה, החלפת תור.
+  // מדוכאים כשאפקט אדמין (נכון/שגוי) הושמע זה עתה — כדי שלא יהיה עומס צלילים.
+  const derivedRef = useRef<{ screen: string; question: string | null; player: string | null } | null>(null);
+  useEffect(() => {
+    if (!snapshot) return;
+    const current = {
+      screen: snapshot.game.publicScreen.kind,
+      question: snapshot.questionText,
+      player: stageAActivePlayerId(snapshot.game) ?? stageCActivePlayerId(snapshot.game),
+    };
+    const prev = derivedRef.current;
+    derivedRef.current = current;
+    if (!prev || !soundEnabled) return;
+    const adminJustPlayed = Date.now() - lastAdminSoundRef.current < 350;
+
+    if (current.screen !== prev.screen) {
+      playEffect('whoosh');
+      return; // מעבר מסך גובר על השאר
+    }
+    if (adminJustPlayed) return;
+    if (current.question && current.question !== prev.question) {
+      playEffect('question');
+      return;
+    }
+    if (current.player && prev.player && current.player !== prev.player) {
+      playEffect('player');
+    }
+  }, [snapshot, soundEnabled]);
 
   // טיימר: טיק-טק וסיום
   const prevTimerRef = useRef<{ status: string; sec: number } | null>(null);

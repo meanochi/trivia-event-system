@@ -13,7 +13,7 @@ import {
   isUndoable,
   migrateGameState,
 } from './reducer';
-import { clearGame, loadContent, loadGame, saveContent, saveGame } from './db';
+import { clearGame, loadContent, loadGame, loadImage, saveContent, saveGame } from './db';
 
 /**
  * ה-Store של חלון האדמין — מקור האמת היחיד.
@@ -153,12 +153,20 @@ export async function restoreAdminState(): Promise<void> {
   if (persistedGame) void saveGame({ state: game, history });
 }
 
-/** מענה לבקשות סנכרון מחלון התצוגה */
+/** מענה לבקשות סנכרון ותמונות מחלון התצוגה */
 channel.addEventListener('message', (e: MessageEvent<SyncMessage>) => {
   if (e.data?.type === 'SYNC_REQUEST') {
     const { game, content, loaded } = useAdminStore.getState();
     if (loaded) {
       channel.postMessage({ type: 'STATE', snapshot: snapshotOf(game, content) } satisfies SyncMessage);
     }
+  }
+  if (e.data?.type === 'IMAGE_REQUEST') {
+    const { loaded } = useAdminStore.getState();
+    if (!loaded) return;
+    const id = e.data.id;
+    void loadImage(id).then((blob) => {
+      if (blob) channel.postMessage({ type: 'IMAGE', id, blob } satisfies SyncMessage);
+    });
   }
 });

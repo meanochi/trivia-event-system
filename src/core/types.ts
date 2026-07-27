@@ -63,8 +63,10 @@ export interface StageCState {
   /** מצביעים גלובליים (משותפים לכל הדו־קרבות) */
   specialCursor: number;
   imageCursor: number;
-  /** כמה תשובות נענו בחלק הנוכחי — קובע את התור (זוגי=שחקן א', אי-זוגי=שחקן ב') */
+  /** כמה תשובות נענו בחלק הנוכחי */
   answeredInPart: number;
+  /** מי בתור בדו־קרב (0/1) — מתחלף אוטומטית וניתן לקביעה ידנית */
+  activeSlot: 0 | 1;
 }
 
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
@@ -159,6 +161,8 @@ export interface StageARun {
   questionIds: string[];
   /** כמה שאלות כבר נענו */
   answered: number;
+  /** מי בתור — מתקדם אוטומטית וניתן לקביעה ידנית */
+  turnIdx: number;
   phase: 'intro' | 'playing' | 'summary';
 }
 
@@ -213,6 +217,7 @@ export type GameAction =
   | { type: 'STAGE_A_LOAD_GROUP'; groupId: GroupId; playerIds: string[]; questionIds: string[] }
   | { type: 'STAGE_A_START' }
   | { type: 'STAGE_A_ANSWER'; correct: boolean }
+  | { type: 'STAGE_A_SET_TURN'; turnIdx: number }
   | { type: 'STAGE_A_FINISH_GROUP' }
   | { type: 'STAGE_B_SETUP'; pairs: { id: string; playerIds: string[] }[]; questionIds: string[] }
   | { type: 'STAGE_B_SHOW_PAIRS' }
@@ -226,6 +231,7 @@ export type GameAction =
   | { type: 'STAGE_C_DUEL_INTRO'; duelIndex: number }
   | { type: 'STAGE_C_START_SPECIAL' }
   | { type: 'STAGE_C_ANSWER'; correct: boolean }
+  | { type: 'STAGE_C_SET_TURN'; slot: 0 | 1 }
   | { type: 'STAGE_C_START_IMAGES' }
   | { type: 'STAGE_C_END_IMAGES' }
   | { type: 'STAGE_C_NEXT_DUEL' }
@@ -257,4 +263,7 @@ export interface DisplaySnapshot {
 export type SyncMessage =
   | { type: 'STATE'; snapshot: DisplaySnapshot }
   | { type: 'SYNC_REQUEST' }
-  | { type: 'SOUND'; name: 'correct' | 'wrong' | 'tick' | 'timeup' | 'reveal' | 'winner' };
+  | { type: 'SOUND'; name: 'correct' | 'wrong' | 'tick' | 'timeup' | 'reveal' | 'winner' }
+  /** מסך הקהל מבקש תמונה; האדמין עונה עם ה-Blob (אמין יותר מ-IndexedDB משותף) */
+  | { type: 'IMAGE_REQUEST'; id: string }
+  | { type: 'IMAGE'; id: string; blob: Blob };

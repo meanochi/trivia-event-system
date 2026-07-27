@@ -240,9 +240,7 @@ function DuelPanel() {
           </div>
         ) : (
           <>
-            <div className="turn-line">
-              בתור: <strong className="active-player-name">{activePlayer?.name ?? '—'}</strong>
-            </div>
+            <TurnPicker duel={duel} activeId={activePlayer?.id} />
             <div className="admin-question">{question?.text ?? '—'}</div>
             {question?.answer && <div className="admin-answer">תשובה: {question.answer}</div>}
             <div className="answer-buttons">
@@ -279,9 +277,20 @@ function DuelPanel() {
             ⬅ לדו־קרב הבא
           </button>
         ) : (
-          <button className="btn btn-pink" onClick={() => dispatch({ type: 'SHOW_LOGO' })}>
-            סיום השלב — חזרה ללוגו
-          </button>
+          <>
+            <button
+              className="btn btn-pink btn-big"
+              onClick={() => {
+                dispatch({ type: 'SET_ACTIVE_STAGE', stage: 'D' });
+                dispatch({ type: 'SHOW_STAGE_TITLE', stage: 'D' });
+              }}
+            >
+              ⬅ המשך לגמר הגדול
+            </button>
+            <button className="btn" onClick={() => dispatch({ type: 'SHOW_LOGO' })}>
+              חזרה ללוגו
+            </button>
+          </>
         )}
       </div>
     </section>
@@ -340,9 +349,7 @@ function ImagesPart({ players, duelNum }: { players: Player[]; duelNum: number }
         <div className="image-question-row">
           {imageUrl && <img className="admin-image-preview" src={imageUrl} alt="" />}
           <div>
-            <div className="turn-line">
-              בתור: <strong className="active-player-name">{activePlayer?.name ?? '—'}</strong>
-            </div>
+            <TurnPicker duel={game.stageC.duels[c.duelIndex] ?? []} activeId={activePlayer?.id} />
             {question?.answer && <div className="admin-answer">תשובה: {question.answer}</div>}
           </div>
         </div>
@@ -362,6 +369,27 @@ function ImagesPart({ players, duelNum }: { players: Player[]; duelNum: number }
 
       <DuelScoreLine players={players} />
     </section>
+  );
+}
+
+function TurnPicker({ duel, activeId }: { duel: string[]; activeId: string | undefined }) {
+  const { content, dispatch } = useAdminStore();
+  return (
+    <div className="turn-picker">
+      <span className="hint">בתור (לחיצה מעבירה את התור):</span>
+      {duel.map((id, i) => {
+        const p = content.players.find((pp) => pp.id === id);
+        return (
+          <button
+            key={id}
+            className={`turn-chip ${id === activeId ? 'active' : ''}`}
+            onClick={() => dispatch({ type: 'STAGE_C_SET_TURN', slot: i as 0 | 1 })}
+          >
+            {p?.name ?? '—'}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

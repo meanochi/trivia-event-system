@@ -231,6 +231,46 @@
 .turn-line { font-size: 1.1rem; color: var(--muted); margin-block: 0.6rem 0.2rem; }
 .active-player-name { color: var(--green-soft); font-size: 1.3rem; }
 
+.turn-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-block: 0.6rem 0.3rem;
+}
+.turn-chip {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.3em 0.9em;
+  border-radius: 999px;
+  border: 2px solid var(--panel-line);
+  background: var(--night-2);
+  color: var(--muted);
+  cursor: pointer;
+}
+.turn-chip:hover { color: var(--text); }
+.turn-chip:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.turn-chip.active {
+  border-color: var(--green);
+  color: var(--green-soft);
+  box-shadow: var(--glow-green);
+  font-weight: 800;
+}
+
+.next-stage-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: rgba(255, 47, 160, 0.08);
+  border: 1px solid var(--pink);
+  border-radius: 14px;
+  padding: 0.8rem 1.1rem;
+  margin-block: 0.6rem;
+  font-size: 1.1rem;
+}
+
 .admin-question {
   font-size: 1.8rem;
   font-weight: 800;

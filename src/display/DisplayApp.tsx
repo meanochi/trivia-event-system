@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DisplaySnapshot, SyncMessage } from '../core/types';
 import { STAGE_NAMES } from '../core/types';
 import Logo from '../components/Logo';
@@ -22,6 +22,7 @@ import {
   StageDWinner,
 } from './StageDScreens';
 import SoundManager from './SoundManager';
+import AmbientBackground from './AmbientBackground';
 import './display.css';
 
 /**
@@ -41,10 +42,26 @@ export default function DisplayApp() {
 
   return (
     <>
+      <AmbientBackground />
       <SoundManager snapshot={snapshot} />
+      <TransitionFlash screenKind={snapshot?.game.publicScreen.kind ?? null} />
       <Screen snapshot={snapshot} />
     </>
   );
+}
+
+/** קרן ניאון חולפת בכל החלפת מסך */
+function TransitionFlash({ screenKind }: { screenKind: string | null }) {
+  const [flashKey, setFlashKey] = useState(0);
+  const prevRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (prevRef.current !== null && screenKind !== null && prevRef.current !== screenKind) {
+      setFlashKey((k) => k + 1);
+    }
+    prevRef.current = screenKind;
+  }, [screenKind]);
+  if (flashKey === 0) return null;
+  return <div key={flashKey} className="transition-flash" />;
 }
 
 function Screen({ snapshot }: { snapshot: DisplaySnapshot | null }) {

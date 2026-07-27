@@ -402,9 +402,20 @@ function MatchPanel() {
                 ⬅ למקצה הבא
               </button>
             ) : (
-              <button className="btn btn-pink" onClick={() => dispatch({ type: 'SHOW_LOGO' })}>
-                סיום השלב — חזרה ללוגו
-              </button>
+              <>
+                <button
+                  className="btn btn-pink btn-big"
+                  onClick={() => {
+                    dispatch({ type: 'SET_ACTIVE_STAGE', stage: 'C' });
+                    dispatch({ type: 'SHOW_STAGE_TITLE', stage: 'C' });
+                  }}
+                >
+                  ⬅ המשך לשלב ג' — פוקר פייס + חזיון תעתועים
+                </button>
+                <button className="btn" onClick={() => dispatch({ type: 'SHOW_LOGO' })}>
+                  חזרה ללוגו
+                </button>
+              </>
             )}
           </div>
         </>
