@@ -79,8 +79,27 @@ export interface TimerState {
 export interface PlayerScore {
   stageA: number;
   stageC: number;
+  /** נקודות סבב הגמר */
+  stageD: number;
+  /** ניקוד בונוס חיצוני (שופטים/מפעיל) */
   external: number;
   manual: number;
+}
+
+// ===== שלב ד' — הגמר הגדול =====
+
+export type StageDPhase = 'none' | 'reveal' | 'round' | 'between' | 'summary' | 'winner';
+
+export interface StageDState {
+  finalistIds: string[];
+  phase: StageDPhase;
+  questionIds: string[];
+  cursor: number;
+  /** אינדקס הפיינליסט שמשחק (או ששיחק אחרון) את סבב הגמר */
+  roundIndex: number;
+  /** כמה סבבים כבר הושלמו */
+  completedRounds: number;
+  winnerId: string | null;
 }
 
 // ===== שלב ב' — ראש בראש =====
@@ -124,7 +143,11 @@ export type PublicScreen =
   | { kind: 'stageC-duel-intro'; duelIndex: number }
   | { kind: 'stageC-special' }
   | { kind: 'stageC-image' }
-  | { kind: 'stageC-duel-summary'; duelIndex: number };
+  | { kind: 'stageC-duel-summary'; duelIndex: number }
+  | { kind: 'stageD-finalists' }
+  | { kind: 'stageD-round'; roundIndex: number }
+  | { kind: 'stageD-summary' }
+  | { kind: 'stageD-winner' };
 
 // ===== שלב א' — הסיבוב המהיר =====
 
@@ -167,6 +190,7 @@ export interface GameState {
   stageA: StageAState;
   stageB: StageBState;
   stageC: StageCState;
+  stageD: StageDState;
   timer: TimerState;
   settings: GameSettings;
 }
@@ -201,6 +225,13 @@ export type GameAction =
   | { type: 'STAGE_C_START_IMAGES' }
   | { type: 'STAGE_C_END_IMAGES' }
   | { type: 'STAGE_C_NEXT_DUEL' }
+  | { type: 'SET_EXTERNAL_SCORE'; playerId: string; value: number }
+  | { type: 'STAGE_D_SETUP'; finalistIds: string[]; questionIds: string[] }
+  | { type: 'STAGE_D_START_ROUND'; roundIndex: number }
+  | { type: 'STAGE_D_ANSWER'; correct: boolean }
+  | { type: 'STAGE_D_END_ROUND' }
+  | { type: 'STAGE_D_SHOW_SUMMARY' }
+  | { type: 'STAGE_D_DECLARE_WINNER'; playerId: string }
   | { type: 'TIMER_START'; totalMs?: number }
   | { type: 'TIMER_PAUSE' }
   | { type: 'TIMER_RESUME' }

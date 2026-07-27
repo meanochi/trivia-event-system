@@ -13,6 +13,7 @@ export function initialGameState(): GameState {
     stageA: { completedGroups: [], run: null },
     stageB: emptyStageB(),
     stageC: emptyStageC(),
+    stageD: emptyStageD(),
     timer: { totalMs: DEFAULT_TIMER_MS, remainingMs: DEFAULT_TIMER_MS, status: 'idle' },
     settings: {
       soundEnabled: true,
@@ -46,6 +47,7 @@ export function migrateGameState(raw: unknown): GameState {
     },
     stageB: { ...emptyStageB(), ...(r.stageB ?? {}) },
     stageC: { ...emptyStageC(), ...(r.stageC ?? {}) },
+    stageD: { ...emptyStageD(), ...(r.stageD ?? {}) },
     timer: { ...base.timer, ...(r.timer ?? {}) },
     settings: { ...base.settings, ...(r.settings ?? {}) },
   };
@@ -79,13 +81,33 @@ export function emptyStageC() {
 /** מספר השאלות המיוחדות בכל דו־קרב: 4 לכל שחקן, לסירוגין */
 export const SPECIAL_PER_DUEL = 8;
 
-export function emptyScore(): PlayerScore {
-  return { stageA: 0, stageC: 0, external: 0, manual: 0 };
+export function emptyStageD() {
+  return {
+    finalistIds: [] as string[],
+    phase: 'none' as const,
+    questionIds: [] as string[],
+    cursor: 0,
+    roundIndex: 0,
+    completedRounds: 0,
+    winnerId: null as string | null,
+  };
 }
 
+export function emptyScore(): PlayerScore {
+  return { stageA: 0, stageC: 0, stageD: 0, external: 0, manual: 0 };
+}
+
+/** סכימה עמידה לשדות חסרים — רשומות ניקוד ישנות עלולות להיות ללא ערוצים חדשים */
 export function totalScore(s: PlayerScore | undefined): number {
   if (!s) return 0;
-  return s.stageA + s.stageC + s.external + s.manual;
+  return (s.stageA ?? 0) + (s.stageC ?? 0) + (s.stageD ?? 0) + (s.external ?? 0) + (s.manual ?? 0);
+}
+
+/** השקלול לבחירת הפיינליסטים: ניקוד אישי (שלבים א'+ג' וידני) + ניקוד חיצוני.
+ *  ניקוד הזוגות בשלב ב' אינו נספר (הוא זוגי). ראו שאלות פתוחות באפיון. */
+export function finaleWeightedScore(s: PlayerScore | undefined): number {
+  if (!s) return 0;
+  return (s.stageA ?? 0) + (s.stageC ?? 0) + (s.external ?? 0) + (s.manual ?? 0);
 }
 
 /** פעולות שנשמרות בהיסטוריית ה-Undo (פעולות משחק, לא ניווט תצוגה וטיימר) */
@@ -96,6 +118,7 @@ export function isUndoable(action: GameAction): boolean {
     case 'STAGE_A_ANSWER':
     case 'STAGE_B_ANSWER':
     case 'STAGE_C_ANSWER':
+    case 'STAGE_D_ANSWER':
       return true;
     default:
       return false;
@@ -139,12 +162,27 @@ export function stageCActivePlayerId(state: GameState): string | null {
   return duel[c.answeredInPart % 2];
 }
 
+/** מזהה השאלה הנוכחית בסבב הגמר */
+export function stageDCurrentQuestionId(state: GameState): string | null {
+  const d = state.stageD;
+  if (d.phase !== 'round') return null;
+  return d.questionIds[d.cursor] ?? null;
+}
+
+/** הפיינליסט שמשחק כעת בגמר */
+export function stageDActivePlayerId(state: GameState): string | null {
+  const d = state.stageD;
+  if (d.phase !== 'round') return null;
+  return d.finalistIds[d.roundIndex] ?? null;
+}
+
 /** השאלה המוצגת כרגע לקהל — מכל שלב שהוא */
 export function currentQuestionId(state: GameState): string | null {
   return (
     stageACurrentQuestionId(state) ??
     stageBCurrentQuestionId(state) ??
-    stageCCurrentQuestionId(state)
+    stageCCurrentQuestionId(state) ??
+    stageDCurrentQuestionId(state)
   );
 }
 
@@ -430,6 +468,75 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         stageC: { ...c, duelIndex: nextIndex, phase: 'intro', answeredInPart: 0 },
         publicScreen: { kind: 'stageC-duel-intro', duelIndex: nextIndex },
+      };
+    }
+
+    case 'SET_EXTERNAL_SCORE':
+      return withPlayerScore(state, action.playerId, (s) => ({ ...s, external: action.value }));
+
+    case 'STAGE_D_SETUP': {
+      return {
+        ...state,
+        activeStage: 'D',
+        stageD: {
+          ...emptyStageD(),
+          finalistIds: action.finalistIds,
+          questionIds: action.questionIds,
+          phase: 'reveal',
+        },
+        publicScreen: { kind: 'stageD-finalists' },
+      };
+    }
+
+    case 'STAGE_D_START_ROUND': {
+      const d = state.stageD;
+      if (d.phase === 'round' || d.phase === 'winner') return state;
+      const totalMs = state.settings.finaleRoundMs;
+      return {
+        ...state,
+        stageD: { ...d, phase: 'round', roundIndex: action.roundIndex },
+        timer: { totalMs, remainingMs: totalMs, status: 'running' },
+        publicScreen: { kind: 'stageD-round', roundIndex: action.roundIndex },
+      };
+    }
+
+    case 'STAGE_D_ANSWER': {
+      const d = state.stageD;
+      if (d.phase !== 'round' || state.timer.status !== 'running') return state;
+      if (d.cursor >= d.questionIds.length) return state;
+      const playerId = d.finalistIds[d.roundIndex];
+      let next = state;
+      if (action.correct && playerId) {
+        next = withPlayerScore(state, playerId, (s) => ({ ...s, stageD: (s.stageD ?? 0) + 1 }));
+      }
+      return { ...next, stageD: { ...d, cursor: d.cursor + 1 } };
+    }
+
+    case 'STAGE_D_END_ROUND': {
+      const d = state.stageD;
+      if (d.phase !== 'round') return state;
+      const completedRounds = Math.max(d.completedRounds, d.roundIndex + 1);
+      const allDone = completedRounds >= d.finalistIds.length;
+      return {
+        ...state,
+        stageD: { ...d, phase: allDone ? 'summary' : 'between', completedRounds },
+        timer: { ...state.timer, remainingMs: state.settings.finaleRoundMs, status: 'idle' },
+        publicScreen: { kind: 'stageD-summary' },
+      };
+    }
+
+    case 'STAGE_D_SHOW_SUMMARY':
+      return {
+        ...state,
+        stageD: { ...state.stageD, phase: state.stageD.phase === 'between' ? 'between' : 'summary' },
+        publicScreen: { kind: 'stageD-summary' },
+      };
+
+    case 'STAGE_D_DECLARE_WINNER': {
+      return {
+        ...state,
+        stageD: { ...state.stageD, phase: 'winner', winnerId: action.playerId },
+        publicScreen: { kind: 'stageD-winner' },
       };
     }
 

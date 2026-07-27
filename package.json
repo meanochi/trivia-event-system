@@ -14,12 +14,14 @@
   "dependencies": {
     "@fontsource/heebo": "^5.3.0",
     "@fontsource/karantina": "^5.3.0",
+    "canvas-confetti": "^1.9.4",
     "idb": "^8.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",

@@ -379,6 +379,27 @@
   background: var(--night);
 }
 
+/* ===== שלב ד' באדמין ===== */
+.tablewrap { overflow-x: auto; }
+.external-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-block: 0.6rem;
+}
+.external-table th,
+.external-table td {
+  border: 1px solid var(--panel-line);
+  padding: 0.45rem 0.7rem;
+  text-align: right;
+}
+.external-table th { background: var(--night-2); font-size: 0.9rem; color: var(--muted); }
+.external-table .num { font-variant-numeric: tabular-nums; }
+.external-table .total-cell { font-weight: 900; color: var(--yellow); }
+.external-table .finalist-row { background: rgba(155, 228, 0, 0.07); }
+.external-table .finalist-row td:nth-child(2) { color: var(--green-soft); font-weight: 700; }
+.external-input { width: 5.5rem; padding: 0.25em 0.5em; }
+.external-table input[type='checkbox'] { accent-color: var(--green); width: 1.1rem; height: 1.1rem; }
+
 /* ===== ניהול שאלות ===== */
 .questions-tab { display: flex; flex-direction: column; gap: 1rem; }
 

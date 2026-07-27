@@ -88,8 +88,15 @@ export const useAdminStore = create<AdminStore>((set, get) => {
     resetGame() {
       history = [];
       void clearGame();
-      const fresh = initialGameState();
-      commitGame(fresh);
+      // איפוס משחק מנקה גם את סימוני "נוצלה" — משחק חדש מתחיל עם מלוא המאגר
+      const content = get().content;
+      const freshContent = {
+        ...content,
+        questions: content.questions.map((q) => (q.used ? { ...q, used: false } : q)),
+      };
+      set({ content: freshContent });
+      void saveContent(freshContent);
+      commitGame(initialGameState());
     },
 
     updateContent(updater) {

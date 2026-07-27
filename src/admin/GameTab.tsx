@@ -4,6 +4,7 @@ import ScorePanel from './ScorePanel';
 import StageAPanel from './StageAPanel';
 import StageBPanel from './StageBPanel';
 import StageCPanel from './StageCPanel';
+import StageDPanel from './StageDPanel';
 
 const STAGES: StageId[] = ['A', 'B', 'C', 'D'];
 const STAGE_LETTERS: Record<StageId, string> = { A: 'א', B: 'ב', C: 'ג', D: 'ד' };
@@ -44,6 +45,14 @@ export default function GameTab() {
         return 'חזיון תעתועים';
       case 'stageC-duel-summary':
         return `סיכום דו־קרב ${screen.duelIndex + 1}`;
+      case 'stageD-finalists':
+        return 'חשיפת הפיינליסטים';
+      case 'stageD-round':
+        return 'סבב גמר';
+      case 'stageD-summary':
+        return 'מצב הגמר';
+      case 'stageD-winner':
+        return '🏆 הכרזת המנצח';
     }
   }
 
@@ -81,14 +90,7 @@ export default function GameTab() {
       {game.activeStage === 'A' && <StageAPanel />}
       {game.activeStage === 'B' && <StageBPanel />}
       {game.activeStage === 'C' && <StageCPanel />}
-      {game.activeStage === 'D' && (
-        <section className="panel stage-placeholder">
-          <h2 className="section-title">
-            שלב {STAGE_LETTERS[game.activeStage]}' — {STAGE_NAMES[game.activeStage]}
-          </h2>
-          <p className="hint">מהלך המשחק של השלב ייבנה בשלב הפיתוח הבא.</p>
-        </section>
-      )}
+      {game.activeStage === 'D' && <StageDPanel />}
 
       <ScorePanel />
     </div>

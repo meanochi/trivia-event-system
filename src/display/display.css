@@ -346,6 +346,65 @@
   background: var(--night-2);
 }
 
+/* ===== שלב ד' — הגמר ===== */
+.finalists-row {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.finalist-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel);
+  border: 3px solid var(--yellow);
+  border-radius: 22px;
+  padding: 1.8rem 2.6rem;
+  box-shadow: var(--glow-yellow);
+  animation: pop-in 0.7s backwards;
+}
+.finalist-name {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: #fff;
+}
+.finalist-score {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}
+.finale-bar { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+
+.winner-screen { gap: 1.2rem; }
+.winner-kicker {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--yellow);
+  text-shadow: var(--glow-yellow);
+  animation: pop-in 0.5s;
+}
+.winner-name {
+  font-family: var(--font-display);
+  font-size: min(16vw, 12rem);
+  line-height: 1.05;
+  color: #fff;
+  -webkit-text-stroke: 0.03em #1b0f35;
+  text-shadow:
+    0.04em 0.05em 0 #1b0f35,
+    0 0 50px rgba(255, 47, 160, 0.75),
+    0 0 120px rgba(255, 227, 0, 0.4);
+  animation: pop-in 0.8s 0.2s backwards;
+  text-align: center;
+}
+.winner-trophy {
+  font-size: 5rem;
+  animation: float-soft 2.4s ease-in-out infinite, pop-in 0.6s 0.5s backwards;
+}
+.winner-logo { opacity: 0.9; }
+
 /* ===== שלב א' — סיכום ===== */
 .summary-board {
   display: flex;

@@ -15,6 +15,12 @@ import {
   StageCImage,
   StageCSpecial,
 } from './StageCScreens';
+import {
+  StageDFinalists,
+  StageDRound,
+  StageDSummary,
+  StageDWinner,
+} from './StageDScreens';
 import './display.css';
 
 /**
@@ -66,6 +72,10 @@ export default function DisplayApp() {
   if (screen.kind === 'stageC-special') return <StageCSpecial snapshot={snapshot} />;
   if (screen.kind === 'stageC-image') return <StageCImage snapshot={snapshot} />;
   if (screen.kind === 'stageC-duel-summary') return <StageCDuelSummary snapshot={snapshot} duelIndex={screen.duelIndex} />;
+  if (screen.kind === 'stageD-finalists') return <StageDFinalists snapshot={snapshot} />;
+  if (screen.kind === 'stageD-round') return <StageDRound snapshot={snapshot} />;
+  if (screen.kind === 'stageD-summary') return <StageDSummary snapshot={snapshot} />;
+  if (screen.kind === 'stageD-winner') return <StageDWinner snapshot={snapshot} />;
 
   // stage-title — כותרת שלב
   return (
