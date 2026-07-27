@@ -323,6 +323,29 @@
   animation: pop-in 0.5s;
 }
 
+/* ===== שלב ג' ===== */
+.duel-player-box {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  background: var(--panel);
+  border: 2px solid var(--panel-line);
+  border-radius: 18px;
+  padding: 0.6em 1.2em;
+}
+.duel-player-box.green { border-color: var(--green); box-shadow: var(--glow-green); }
+.duel-player-box.pink { border-color: var(--pink); box-shadow: var(--glow-pink); }
+
+.display-image {
+  max-width: min(80vw, 65rem);
+  max-height: 58vh;
+  border-radius: 20px;
+  border: 4px solid var(--panel-line);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  animation: pop-in 0.4s;
+  object-fit: contain;
+  background: var(--night-2);
+}
+
 /* ===== שלב א' — סיכום ===== */
 .summary-board {
   display: flex;

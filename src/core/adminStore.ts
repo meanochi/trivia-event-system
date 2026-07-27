@@ -41,7 +41,12 @@ const EMPTY_CONTENT: ContentState = { players: [], questions: [] };
 function snapshotOf(game: GameState, content: ContentState): DisplaySnapshot {
   const questionId = currentQuestionId(game);
   const question = questionId ? content.questions.find((q) => q.id === questionId) : null;
-  return { game, players: content.players, questionText: question?.text ?? null };
+  return {
+    game,
+    players: content.players,
+    questionText: question?.text ?? null,
+    questionImageId: question?.imageId ?? null,
+  };
 }
 
 export const useAdminStore = create<AdminStore>((set, get) => {

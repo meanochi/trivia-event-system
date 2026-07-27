@@ -12,6 +12,7 @@ export function initialGameState(): GameState {
     scores: {},
     stageA: { completedGroups: [], run: null },
     stageB: emptyStageB(),
+    stageC: emptyStageC(),
     timer: { totalMs: DEFAULT_TIMER_MS, remainingMs: DEFAULT_TIMER_MS, status: 'idle' },
     settings: {
       soundEnabled: true,
@@ -44,6 +45,7 @@ export function migrateGameState(raw: unknown): GameState {
       run: r.stageA?.run ?? null,
     },
     stageB: { ...emptyStageB(), ...(r.stageB ?? {}) },
+    stageC: { ...emptyStageC(), ...(r.stageC ?? {}) },
     timer: { ...base.timer, ...(r.timer ?? {}) },
     settings: { ...base.settings, ...(r.settings ?? {}) },
   };
@@ -61,6 +63,22 @@ export function emptyStageB() {
   };
 }
 
+export function emptyStageC() {
+  return {
+    duels: [] as string[][],
+    duelIndex: 0,
+    phase: 'none' as const,
+    specialQuestionIds: [] as string[],
+    imageQuestionIds: [] as string[],
+    specialCursor: 0,
+    imageCursor: 0,
+    answeredInPart: 0,
+  };
+}
+
+/** מספר השאלות המיוחדות בכל דו־קרב: 4 לכל שחקן, לסירוגין */
+export const SPECIAL_PER_DUEL = 8;
+
 export function emptyScore(): PlayerScore {
   return { stageA: 0, stageC: 0, external: 0, manual: 0 };
 }
@@ -77,6 +95,7 @@ export function isUndoable(action: GameAction): boolean {
     case 'MANUAL_ADJUST_PAIR':
     case 'STAGE_A_ANSWER':
     case 'STAGE_B_ANSWER':
+    case 'STAGE_C_ANSWER':
       return true;
     default:
       return false;
@@ -103,9 +122,30 @@ export function stageBMatchPairs(state: GameState) {
   return [b.pairs[b.matchIndex * 2], b.pairs[b.matchIndex * 2 + 1]] as const;
 }
 
+/** מזהה השאלה הנוכחית בשלב ג' (פוקר פייס או חזיון תעתועים) */
+export function stageCCurrentQuestionId(state: GameState): string | null {
+  const c = state.stageC;
+  if (c.phase === 'special') return c.specialQuestionIds[c.specialCursor] ?? null;
+  if (c.phase === 'images') return c.imageQuestionIds[c.imageCursor] ?? null;
+  return null;
+}
+
+/** השחקן שבתורו בדו־קרב הנוכחי של שלב ג' */
+export function stageCActivePlayerId(state: GameState): string | null {
+  const c = state.stageC;
+  if (c.phase !== 'special' && c.phase !== 'images') return null;
+  const duel = c.duels[c.duelIndex];
+  if (!duel || duel.length === 0) return null;
+  return duel[c.answeredInPart % 2];
+}
+
 /** השאלה המוצגת כרגע לקהל — מכל שלב שהוא */
 export function currentQuestionId(state: GameState): string | null {
-  return stageACurrentQuestionId(state) ?? stageBCurrentQuestionId(state);
+  return (
+    stageACurrentQuestionId(state) ??
+    stageBCurrentQuestionId(state) ??
+    stageCCurrentQuestionId(state)
+  );
 }
 
 /** מזהה השאלה הנוכחית בסבב שלב א' (null אם אין סבב פעיל או שנגמרו) */
@@ -283,6 +323,113 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         stageB: { ...b, matchIndex: nextIndex, matchPhase: 'intro' },
         publicScreen: { kind: 'stageB-match-intro', matchIndex: nextIndex },
+      };
+    }
+
+    case 'STAGE_C_SETUP': {
+      return {
+        ...state,
+        activeStage: 'C',
+        stageC: {
+          ...emptyStageC(),
+          duels: action.duels,
+          specialQuestionIds: action.specialQuestionIds,
+          imageQuestionIds: action.imageQuestionIds,
+          phase: 'intro',
+        },
+        publicScreen: { kind: 'stageC-duel-intro', duelIndex: 0 },
+      };
+    }
+
+    case 'STAGE_C_DUEL_INTRO': {
+      return {
+        ...state,
+        stageC: { ...state.stageC, duelIndex: action.duelIndex, phase: 'intro' },
+        publicScreen: { kind: 'stageC-duel-intro', duelIndex: action.duelIndex },
+      };
+    }
+
+    case 'STAGE_C_START_SPECIAL': {
+      const c = state.stageC;
+      if (c.phase !== 'intro') return state;
+      return {
+        ...state,
+        stageC: { ...c, phase: 'special', answeredInPart: 0 },
+        publicScreen: { kind: 'stageC-special' },
+      };
+    }
+
+    case 'STAGE_C_ANSWER': {
+      const c = state.stageC;
+      if (c.phase === 'special') {
+        if (c.answeredInPart >= SPECIAL_PER_DUEL) return state;
+        if (c.specialCursor >= c.specialQuestionIds.length) return state;
+        const playerId = stageCActivePlayerId(state);
+        let next = state;
+        if (action.correct && playerId) {
+          next = withPlayerScore(state, playerId, (s) => ({ ...s, stageC: s.stageC + 1 }));
+        }
+        return {
+          ...next,
+          stageC: {
+            ...c,
+            specialCursor: c.specialCursor + 1,
+            answeredInPart: c.answeredInPart + 1,
+          },
+        };
+      }
+      if (c.phase === 'images') {
+        // תשובות רק כשהשעון רץ — השהיה חוסמת
+        if (state.timer.status !== 'running') return state;
+        if (c.imageCursor >= c.imageQuestionIds.length) return state;
+        const playerId = stageCActivePlayerId(state);
+        let next = state;
+        if (action.correct && playerId) {
+          next = withPlayerScore(state, playerId, (s) => ({ ...s, stageC: s.stageC + 1 }));
+        }
+        return {
+          ...next,
+          stageC: {
+            ...c,
+            imageCursor: c.imageCursor + 1,
+            answeredInPart: c.answeredInPart + 1,
+          },
+        };
+      }
+      return state;
+    }
+
+    case 'STAGE_C_START_IMAGES': {
+      const c = state.stageC;
+      if (c.phase !== 'special' && c.phase !== 'intro') return state;
+      const totalMs = state.settings.imageRoundMs;
+      return {
+        ...state,
+        stageC: { ...c, phase: 'images', answeredInPart: 0 },
+        timer: { totalMs, remainingMs: totalMs, status: 'running' },
+        publicScreen: { kind: 'stageC-image' },
+      };
+    }
+
+    case 'STAGE_C_END_IMAGES': {
+      const c = state.stageC;
+      if (c.phase !== 'images') return state;
+      return {
+        ...state,
+        stageC: { ...c, phase: 'summary' },
+        timer: { ...state.timer, remainingMs: state.settings.imageRoundMs, status: 'idle' },
+        publicScreen: { kind: 'stageC-duel-summary', duelIndex: c.duelIndex },
+      };
+    }
+
+    case 'STAGE_C_NEXT_DUEL': {
+      const c = state.stageC;
+      const nextIndex = c.duelIndex + 1;
+      if (nextIndex >= c.duels.length) return state;
+      return {
+        ...state,
+        stageC: { ...c, duelIndex: nextIndex, phase: 'intro', answeredInPart: 0 },
+        publicScreen: { kind: 'stageC-duel-intro', duelIndex: nextIndex },
       };
     }
 

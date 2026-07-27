@@ -9,6 +9,12 @@ import {
   StageBPairs,
   StageBRound,
 } from './StageBScreens';
+import {
+  StageCDuelIntro,
+  StageCDuelSummary,
+  StageCImage,
+  StageCSpecial,
+} from './StageCScreens';
 import './display.css';
 
 /**
@@ -56,6 +62,10 @@ export default function DisplayApp() {
   if (screen.kind === 'stageB-match-intro') return <StageBMatchIntro snapshot={snapshot} matchIndex={screen.matchIndex} />;
   if (screen.kind === 'stageB-round') return <StageBRound snapshot={snapshot} />;
   if (screen.kind === 'stageB-match-summary') return <StageBMatchSummary snapshot={snapshot} matchIndex={screen.matchIndex} />;
+  if (screen.kind === 'stageC-duel-intro') return <StageCDuelIntro snapshot={snapshot} duelIndex={screen.duelIndex} />;
+  if (screen.kind === 'stageC-special') return <StageCSpecial snapshot={snapshot} />;
+  if (screen.kind === 'stageC-image') return <StageCImage snapshot={snapshot} />;
+  if (screen.kind === 'stageC-duel-summary') return <StageCDuelSummary snapshot={snapshot} duelIndex={screen.duelIndex} />;
 
   // stage-title — כותרת שלב
   return (

@@ -48,6 +48,25 @@ export const STAGE_NAMES: Record<StageId, string> = {
   D: 'הגמר הגדול',
 };
 
+// ===== שלב ג' — פוקר פייס + חזיון תעתועים =====
+
+export type StageCPhase = 'none' | 'intro' | 'special' | 'images' | 'summary';
+
+export interface StageCState {
+  /** 3 דו־קרבות × 2 שחקנים; ריק = טרם בוצע המעבר */
+  duels: string[][];
+  duelIndex: number;
+  phase: StageCPhase;
+  /** מאגרי השאלות שנתפסו באישור, לפי סדר */
+  specialQuestionIds: string[];
+  imageQuestionIds: string[];
+  /** מצביעים גלובליים (משותפים לכל הדו־קרבות) */
+  specialCursor: number;
+  imageCursor: number;
+  /** כמה תשובות נענו בחלק הנוכחי — קובע את התור (זוגי=שחקן א', אי-זוגי=שחקן ב') */
+  answeredInPart: number;
+}
+
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 
 export interface TimerState {
@@ -101,7 +120,11 @@ export type PublicScreen =
   | { kind: 'stageB-pairs' }
   | { kind: 'stageB-match-intro'; matchIndex: number }
   | { kind: 'stageB-round'; matchIndex: number; round: 0 | 1 }
-  | { kind: 'stageB-match-summary'; matchIndex: number };
+  | { kind: 'stageB-match-summary'; matchIndex: number }
+  | { kind: 'stageC-duel-intro'; duelIndex: number }
+  | { kind: 'stageC-special' }
+  | { kind: 'stageC-image' }
+  | { kind: 'stageC-duel-summary'; duelIndex: number };
 
 // ===== שלב א' — הסיבוב המהיר =====
 
@@ -143,6 +166,7 @@ export interface GameState {
   scores: Record<string, PlayerScore>;
   stageA: StageAState;
   stageB: StageBState;
+  stageC: StageCState;
   timer: TimerState;
   settings: GameSettings;
 }
@@ -170,6 +194,13 @@ export type GameAction =
   | { type: 'STAGE_B_END_ROUND' }
   | { type: 'STAGE_B_PICK_WINNER'; pairId: string }
   | { type: 'STAGE_B_NEXT_MATCH' }
+  | { type: 'STAGE_C_SETUP'; duels: string[][]; specialQuestionIds: string[]; imageQuestionIds: string[] }
+  | { type: 'STAGE_C_DUEL_INTRO'; duelIndex: number }
+  | { type: 'STAGE_C_START_SPECIAL' }
+  | { type: 'STAGE_C_ANSWER'; correct: boolean }
+  | { type: 'STAGE_C_START_IMAGES' }
+  | { type: 'STAGE_C_END_IMAGES' }
+  | { type: 'STAGE_C_NEXT_DUEL' }
   | { type: 'TIMER_START'; totalMs?: number }
   | { type: 'TIMER_PAUSE' }
   | { type: 'TIMER_RESUME' }
@@ -184,6 +215,8 @@ export interface DisplaySnapshot {
   game: GameState;
   players: Player[];
   questionText: string | null;
+  /** מזהה תמונת השאלה הנוכחית (חזיון תעתועים) — מסך הקהל טוען אותה מ-IndexedDB */
+  questionImageId: string | null;
 }
 
 export type SyncMessage =

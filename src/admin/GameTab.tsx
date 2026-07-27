@@ -3,6 +3,7 @@ import { STAGE_NAMES, type StageId } from '../core/types';
 import ScorePanel from './ScorePanel';
 import StageAPanel from './StageAPanel';
 import StageBPanel from './StageBPanel';
+import StageCPanel from './StageCPanel';
 
 const STAGES: StageId[] = ['A', 'B', 'C', 'D'];
 const STAGE_LETTERS: Record<StageId, string> = { A: 'א', B: 'ב', C: 'ג', D: 'ד' };
@@ -35,6 +36,14 @@ export default function GameTab() {
         return 'סבב ראש בראש';
       case 'stageB-match-summary':
         return `סיכום מקצה ${screen.matchIndex + 1}`;
+      case 'stageC-duel-intro':
+        return `הצגת דו־קרב ${screen.duelIndex + 1}`;
+      case 'stageC-special':
+        return 'פוקר פייס';
+      case 'stageC-image':
+        return 'חזיון תעתועים';
+      case 'stageC-duel-summary':
+        return `סיכום דו־קרב ${screen.duelIndex + 1}`;
     }
   }
 
@@ -71,7 +80,8 @@ export default function GameTab() {
 
       {game.activeStage === 'A' && <StageAPanel />}
       {game.activeStage === 'B' && <StageBPanel />}
-      {game.activeStage !== 'A' && game.activeStage !== 'B' && (
+      {game.activeStage === 'C' && <StageCPanel />}
+      {game.activeStage === 'D' && (
         <section className="panel stage-placeholder">
           <h2 className="section-title">
             שלב {STAGE_LETTERS[game.activeStage]}' — {STAGE_NAMES[game.activeStage]}
