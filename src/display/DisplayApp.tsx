@@ -3,6 +3,12 @@ import type { DisplaySnapshot, SyncMessage } from '../core/types';
 import { STAGE_NAMES } from '../core/types';
 import Logo from '../components/Logo';
 import { StageAIntro, StageAQuestion, StageASummary } from './StageAScreens';
+import {
+  StageBMatchIntro,
+  StageBMatchSummary,
+  StageBPairs,
+  StageBRound,
+} from './StageBScreens';
 import './display.css';
 
 /**
@@ -46,6 +52,10 @@ export default function DisplayApp() {
   if (screen.kind === 'stageA-intro') return <StageAIntro snapshot={snapshot} groupId={screen.groupId} />;
   if (screen.kind === 'stageA-question') return <StageAQuestion snapshot={snapshot} />;
   if (screen.kind === 'stageA-summary') return <StageASummary snapshot={snapshot} groupId={screen.groupId} />;
+  if (screen.kind === 'stageB-pairs') return <StageBPairs snapshot={snapshot} />;
+  if (screen.kind === 'stageB-match-intro') return <StageBMatchIntro snapshot={snapshot} matchIndex={screen.matchIndex} />;
+  if (screen.kind === 'stageB-round') return <StageBRound snapshot={snapshot} />;
+  if (screen.kind === 'stageB-match-summary') return <StageBMatchSummary snapshot={snapshot} matchIndex={screen.matchIndex} />;
 
   // stage-title — כותרת שלב
   return (

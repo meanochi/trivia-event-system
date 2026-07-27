@@ -174,6 +174,155 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== שלב ב' — ראש בראש ===== */
+.pairs-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+.pairs-match { animation: pop-in 0.5s backwards; }
+.pairs-match-label {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--yellow);
+  text-align: center;
+  margin-block-end: 0.4rem;
+}
+.pairs-match-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  justify-content: center;
+}
+.vs {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--pink);
+}
+.vs-big {
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  color: var(--pink);
+  text-shadow: var(--glow-pink);
+}
+
+.pair-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  background: var(--panel);
+  border: 2px solid var(--panel-line);
+  border-radius: 14px;
+  padding: 0.7rem 1.4rem;
+  min-width: 12rem;
+}
+.pair-box-name { font-size: 1.3rem; font-weight: 700; }
+.pair-box.big { padding: 1.2rem 2.2rem; border-radius: 18px; }
+.pair-box.big .pair-box-name { font-size: 2.1rem; }
+.pair-box.green { border-color: var(--green); box-shadow: var(--glow-green); }
+.pair-box.pink { border-color: var(--pink); box-shadow: var(--glow-pink); }
+
+.versus-layout {
+  display: flex;
+  align-items: center;
+  gap: 2.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stageb-layout {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.2rem;
+}
+.stageb-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.display-timer {
+  font-family: var(--font-display);
+  font-size: 4.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text);
+}
+.display-timer.paused { animation: blink 1s infinite; color: var(--yellow); }
+.display-timer.urgent, .display-timer.finished { color: var(--pink); text-shadow: var(--glow-pink); }
+.pause-badge {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  background: var(--yellow);
+  color: #3a3000;
+  border-radius: 10px;
+  padding: 0.15em 0.8em;
+  font-weight: 800;
+}
+.stageb-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2rem;
+}
+.stageb-pairs-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+.pair-score-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--panel);
+  border: 2px solid var(--panel-line);
+  border-radius: 16px;
+  padding: 0.9rem 1.4rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pair-score-box.active {
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+  background: #2d2154;
+}
+.pair-score-names { font-size: 1.4rem; font-weight: 700; }
+.pair-score-box.active .pair-score-names { color: var(--green-soft); }
+.pair-score-value {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}
+
+.pair-summary-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  animation: pop-in 0.5s backwards;
+}
+.pair-summary-box.loser { opacity: 0.55; }
+.pair-summary-score {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+}
+.winner-badge {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  background: var(--green);
+  color: #142400;
+  border-radius: 12px;
+  padding: 0.15em 0.9em;
+  box-shadow: var(--glow-green);
+  animation: pop-in 0.5s;
+}
+
 /* ===== שלב א' — סיכום ===== */
 .summary-board {
   display: flex;

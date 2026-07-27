@@ -296,6 +296,67 @@
   padding: 0.1em 0.7em;
 }
 
+/* ===== שלב ב' באדמין ===== */
+.transition-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-block: 0.8rem;
+}
+.transition-group {
+  background: var(--night-2);
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+.transition-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+.transition-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.transition-row.picked { border-color: var(--green); background: rgba(155, 228, 0, 0.07); }
+.transition-row input { accent-color: var(--green); }
+.transition-row .rank { color: var(--muted); min-width: 1.4em; text-align: center; font-size: 0.85rem; }
+
+.pairs-editor { margin-block-start: 1rem; }
+.pairs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.9rem;
+  margin-block: 0.6rem;
+}
+.pair-card {
+  background: var(--night-2);
+  border: 1px solid var(--panel-line);
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.pair-card.invalid { border-color: var(--pink); }
+.pair-card-title { font-weight: 700; color: var(--green-soft); }
+
+.match-pairs-line { font-size: 1.2rem; margin-block: 0.6rem; }
+.match-score-line { font-size: 1.1rem; color: var(--muted); margin-block-start: 0.8rem; }
+.match-score-line strong { color: var(--yellow); font-size: 1.3rem; }
+.match-score-line.big { font-size: 1.4rem; }
+
+.timer-inline {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+.timer-inline.paused { color: var(--yellow); animation: blink 1s infinite; }
+.timer-inline.finished { color: var(--pink); }
+
+.pair-score-panel { margin-block-end: 0.8rem; }
+
 /* ===== ניהול שאלות ===== */
 .questions-tab { display: flex; flex-direction: column; gap: 1rem; }
 

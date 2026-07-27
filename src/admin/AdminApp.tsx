@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { restoreAdminState, useAdminStore } from '../core/adminStore';
 import Logo from '../components/Logo';
 import GameTab from './GameTab';
@@ -17,13 +17,31 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 export default function AdminApp() {
-  const { historyLength, loaded, undo, resetGame } = useAdminStore();
+  const { game, historyLength, loaded, undo, resetGame } = useAdminStore();
   const [tab, setTab] = useState<TabId>('game');
   const [confirmReset, setConfirmReset] = useState(false);
 
   useEffect(() => {
     void restoreAdminState();
   }, []);
+
+  // לולאת הטיימר — רצה רק בחלון האדמין, לפי זמן אמת (לא צוברת סטייה)
+  const lastTickRef = useRef<number | null>(null);
+  const timerRunning = game.timer.status === 'running';
+  useEffect(() => {
+    if (!timerRunning) {
+      lastTickRef.current = null;
+      return;
+    }
+    lastTickRef.current = Date.now();
+    const id = setInterval(() => {
+      const now = Date.now();
+      const dtMs = now - (lastTickRef.current ?? now);
+      lastTickRef.current = now;
+      useAdminStore.getState().dispatch({ type: 'TICK', dtMs });
+    }, 200);
+    return () => clearInterval(id);
+  }, [timerRunning]);
 
   if (!loaded) return <div className="admin-loading">טוען את המשחק…</div>;
 

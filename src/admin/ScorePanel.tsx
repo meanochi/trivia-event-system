@@ -18,9 +18,43 @@ export default function ScorePanel() {
     );
   }
 
+  const pairs = game.stageB.pairs;
+  const nameOf = (id: string) => content.players.find((p) => p.id === id)?.name ?? '—';
+
   return (
     <section className="panel score-panel">
       <h2 className="section-title">פאנל ניקוד ידני</h2>
+
+      {game.activeStage === 'B' && pairs.length > 0 && (
+        <div className="pair-score-panel">
+          <h3 className="score-group-title">ניקוד זוגות (ראש בראש)</h3>
+          <ul className="score-list">
+            {pairs.map((p, i) => (
+              <li key={p.id}>
+                <span className="score-name">
+                  זוג {i + 1}: {p.playerIds.map(nameOf).join(' ו')}
+                </span>
+                <span className="score-value">{p.score}</span>
+                <span className="score-buttons">
+                  <button
+                    className="btn btn-mini"
+                    onClick={() => dispatch({ type: 'MANUAL_ADJUST_PAIR', pairId: p.id, delta: 1 })}
+                  >
+                    +1
+                  </button>
+                  <button
+                    className="btn btn-mini"
+                    onClick={() => dispatch({ type: 'MANUAL_ADJUST_PAIR', pairId: p.id, delta: -1 })}
+                  >
+                    −1
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="score-groups">
         {GROUP_IDS.map((gid, gi) => {
           const members = content.players.filter((p) => p.groupId === gid);

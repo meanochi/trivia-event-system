@@ -10,8 +10,8 @@ export function initialGameState(): GameState {
     publicScreen: { kind: 'logo' },
     activeStage: 'A',
     scores: {},
-    pairs: [],
     stageA: { completedGroups: [], run: null },
+    stageB: emptyStageB(),
     timer: { totalMs: DEFAULT_TIMER_MS, remainingMs: DEFAULT_TIMER_MS, status: 'idle' },
     settings: {
       soundEnabled: true,
@@ -39,13 +39,25 @@ export function migrateGameState(raw: unknown): GameState {
     publicScreen: r.publicScreen ?? base.publicScreen,
     activeStage: r.activeStage ?? base.activeStage,
     scores: r.scores ?? base.scores,
-    pairs: r.pairs ?? base.pairs,
     stageA: {
       completedGroups: r.stageA?.completedGroups ?? [],
       run: r.stageA?.run ?? null,
     },
+    stageB: { ...emptyStageB(), ...(r.stageB ?? {}) },
     timer: { ...base.timer, ...(r.timer ?? {}) },
     settings: { ...base.settings, ...(r.settings ?? {}) },
+  };
+}
+
+export function emptyStageB() {
+  return {
+    pairs: [],
+    questionIds: [],
+    cursor: 0,
+    matchIndex: 0,
+    matchPhase: 'none' as const,
+    activeRound: 0 as const,
+    winners: [null, null, null] as (string | null)[],
   };
 }
 
@@ -64,10 +76,36 @@ export function isUndoable(action: GameAction): boolean {
     case 'MANUAL_ADJUST_PLAYER':
     case 'MANUAL_ADJUST_PAIR':
     case 'STAGE_A_ANSWER':
+    case 'STAGE_B_ANSWER':
       return true;
     default:
       return false;
   }
+}
+
+/** מזהה השאלה הנוכחית בסבב ראש בראש (null אם אין סבב פעיל או שנגמרו) */
+export function stageBCurrentQuestionId(state: GameState): string | null {
+  const b = state.stageB;
+  if (b.matchPhase !== 'round') return null;
+  return b.questionIds[b.cursor] ?? null;
+}
+
+/** הזוג שמשחק כעת בראש בראש */
+export function stageBActivePair(state: GameState) {
+  const b = state.stageB;
+  if (b.matchPhase !== 'round') return null;
+  return b.pairs[b.matchIndex * 2 + b.activeRound] ?? null;
+}
+
+/** שני הזוגות של המקצה הנוכחי */
+export function stageBMatchPairs(state: GameState) {
+  const b = state.stageB;
+  return [b.pairs[b.matchIndex * 2], b.pairs[b.matchIndex * 2 + 1]] as const;
+}
+
+/** השאלה המוצגת כרגע לקהל — מכל שלב שהוא */
+export function currentQuestionId(state: GameState): string | null {
+  return stageACurrentQuestionId(state) ?? stageBCurrentQuestionId(state);
 }
 
 /** מזהה השאלה הנוכחית בסבב שלב א' (null אם אין סבב פעיל או שנגמרו) */
@@ -108,10 +146,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return withPlayerScore(state, action.playerId, (s) => ({ ...s, manual: s.manual + action.delta }));
 
     case 'MANUAL_ADJUST_PAIR': {
-      const pairs = state.pairs.map((p) =>
+      const pairs = state.stageB.pairs.map((p) =>
         p.id === action.pairId ? { ...p, score: p.score + action.delta } : p,
       );
-      return { ...state, pairs };
+      return { ...state, stageB: { ...state.stageB, pairs } };
     }
 
     case 'UPDATE_SETTINGS':
@@ -167,6 +205,84 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         stageA: { completedGroups, run: { ...run, phase: 'summary' } },
         publicScreen: { kind: 'stageA-summary', groupId: run.groupId },
+      };
+    }
+
+    case 'STAGE_B_SETUP': {
+      return {
+        ...state,
+        activeStage: 'B',
+        stageB: {
+          ...emptyStageB(),
+          pairs: action.pairs.map((p) => ({ ...p, score: 0 })),
+          questionIds: action.questionIds,
+        },
+        publicScreen: { kind: 'stageB-pairs' },
+      };
+    }
+
+    case 'STAGE_B_SHOW_PAIRS':
+      return { ...state, publicScreen: { kind: 'stageB-pairs' } };
+
+    case 'STAGE_B_MATCH_INTRO': {
+      return {
+        ...state,
+        stageB: { ...state.stageB, matchIndex: action.matchIndex, matchPhase: 'intro' },
+        publicScreen: { kind: 'stageB-match-intro', matchIndex: action.matchIndex },
+      };
+    }
+
+    case 'STAGE_B_START_ROUND': {
+      const b = state.stageB;
+      if (b.matchPhase !== 'intro' && b.matchPhase !== 'between') return state;
+      const totalMs = state.settings.pairRoundMs;
+      return {
+        ...state,
+        stageB: { ...b, matchPhase: 'round', activeRound: action.round },
+        timer: { totalMs, remainingMs: totalMs, status: 'running' },
+        publicScreen: { kind: 'stageB-round', matchIndex: b.matchIndex, round: action.round },
+      };
+    }
+
+    case 'STAGE_B_ANSWER': {
+      const b = state.stageB;
+      // תשובות מתקבלות רק כשהשעון רץ — השהיה חוסמת (לפי האפיון)
+      if (b.matchPhase !== 'round' || state.timer.status !== 'running') return state;
+      if (b.cursor >= b.questionIds.length) return state;
+      const activePairIdx = b.matchIndex * 2 + b.activeRound;
+      const pairs = action.correct
+        ? b.pairs.map((p, i) => (i === activePairIdx ? { ...p, score: p.score + 1 } : p))
+        : b.pairs;
+      return { ...state, stageB: { ...b, pairs, cursor: b.cursor + 1 } };
+    }
+
+    case 'STAGE_B_END_ROUND': {
+      const b = state.stageB;
+      if (b.matchPhase !== 'round') return state;
+      const done = b.activeRound === 1;
+      return {
+        ...state,
+        stageB: { ...b, matchPhase: done ? 'summary' : 'between' },
+        timer: { ...state.timer, remainingMs: state.settings.pairRoundMs, status: 'idle' },
+        publicScreen: { kind: 'stageB-match-summary', matchIndex: b.matchIndex },
+      };
+    }
+
+    case 'STAGE_B_PICK_WINNER': {
+      const b = state.stageB;
+      const winners = [...b.winners];
+      winners[b.matchIndex] = action.pairId;
+      return { ...state, stageB: { ...b, winners } };
+    }
+
+    case 'STAGE_B_NEXT_MATCH': {
+      const b = state.stageB;
+      const nextIndex = b.matchIndex + 1;
+      if (nextIndex > 2) return state;
+      return {
+        ...state,
+        stageB: { ...b, matchIndex: nextIndex, matchPhase: 'intro' },
+        publicScreen: { kind: 'stageB-match-intro', matchIndex: nextIndex },
       };
     }
 

@@ -7,11 +7,11 @@ import type {
   SyncMessage,
 } from './types';
 import {
+  currentQuestionId,
   gameReducer,
   initialGameState,
   isUndoable,
   migrateGameState,
-  stageACurrentQuestionId,
 } from './reducer';
 import { clearGame, loadContent, loadGame, saveContent, saveGame } from './db';
 
@@ -39,7 +39,7 @@ let history: GameState[] = [];
 const EMPTY_CONTENT: ContentState = { players: [], questions: [] };
 
 function snapshotOf(game: GameState, content: ContentState): DisplaySnapshot {
-  const questionId = stageACurrentQuestionId(game);
+  const questionId = currentQuestionId(game);
   const question = questionId ? content.questions.find((q) => q.id === questionId) : null;
   return { game, players: content.players, questionText: question?.text ?? null };
 }

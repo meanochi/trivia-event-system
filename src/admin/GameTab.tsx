@@ -2,6 +2,7 @@ import { useAdminStore } from '../core/adminStore';
 import { STAGE_NAMES, type StageId } from '../core/types';
 import ScorePanel from './ScorePanel';
 import StageAPanel from './StageAPanel';
+import StageBPanel from './StageBPanel';
 
 const STAGES: StageId[] = ['A', 'B', 'C', 'D'];
 const STAGE_LETTERS: Record<StageId, string> = { A: 'א', B: 'ב', C: 'ג', D: 'ד' };
@@ -26,6 +27,14 @@ export default function GameTab() {
         return 'שאלה — הסיבוב המהיר';
       case 'stageA-summary':
         return 'סיכום קבוצה';
+      case 'stageB-pairs':
+        return 'הזוגות — ראש בראש';
+      case 'stageB-match-intro':
+        return `הצגת מקצה ${screen.matchIndex + 1}`;
+      case 'stageB-round':
+        return 'סבב ראש בראש';
+      case 'stageB-match-summary':
+        return `סיכום מקצה ${screen.matchIndex + 1}`;
     }
   }
 
@@ -60,9 +69,9 @@ export default function GameTab() {
         </div>
       </section>
 
-      {game.activeStage === 'A' ? (
-        <StageAPanel />
-      ) : (
+      {game.activeStage === 'A' && <StageAPanel />}
+      {game.activeStage === 'B' && <StageBPanel />}
+      {game.activeStage !== 'A' && game.activeStage !== 'B' && (
         <section className="panel stage-placeholder">
           <h2 className="section-title">
             שלב {STAGE_LETTERS[game.activeStage]}' — {STAGE_NAMES[game.activeStage]}

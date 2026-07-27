@@ -64,10 +64,31 @@ export interface PlayerScore {
   manual: number;
 }
 
-export interface PairState {
+// ===== שלב ב' — ראש בראש =====
+
+export interface StageBPair {
   id: string;
-  playerIds: [string, string];
+  playerIds: string[];
+  /** הניקוד בשלב זה הוא לזוג בלבד */
   score: number;
+}
+
+export type StageBMatchPhase = 'none' | 'intro' | 'round' | 'between' | 'summary';
+
+export interface StageBState {
+  /** 6 הזוגות לאחר אישור המפעיל; ריק = טרם בוצע המעבר משלב א' */
+  pairs: StageBPair[];
+  /** מאגר השאלות שנתפס באישור הזוגות, לפי סדר */
+  questionIds: string[];
+  /** מצביע השאלה הבאה (משותף לכל המקצים) */
+  cursor: number;
+  /** המקצה הנוכחי: 0..2 (מקצה i = זוגות 2i, 2i+1) */
+  matchIndex: number;
+  matchPhase: StageBMatchPhase;
+  /** הסבב הפעיל במקצה: 0 = הזוג הראשון, 1 = השני */
+  activeRound: 0 | 1;
+  /** מזהי הזוגות המנצחים לפי מקצה */
+  winners: (string | null)[];
 }
 
 /** המסך המוצג כרגע על מסך הקהל */
@@ -76,7 +97,11 @@ export type PublicScreen =
   | { kind: 'stage-title'; stage: StageId }
   | { kind: 'stageA-intro'; groupId: GroupId }
   | { kind: 'stageA-question' }
-  | { kind: 'stageA-summary'; groupId: GroupId };
+  | { kind: 'stageA-summary'; groupId: GroupId }
+  | { kind: 'stageB-pairs' }
+  | { kind: 'stageB-match-intro'; matchIndex: number }
+  | { kind: 'stageB-round'; matchIndex: number; round: 0 | 1 }
+  | { kind: 'stageB-match-summary'; matchIndex: number };
 
 // ===== שלב א' — הסיבוב המהיר =====
 
@@ -116,8 +141,8 @@ export interface GameState {
   /** השלב הפעיל (לצורך ניווט באדמין) */
   activeStage: StageId;
   scores: Record<string, PlayerScore>;
-  pairs: PairState[];
   stageA: StageAState;
+  stageB: StageBState;
   timer: TimerState;
   settings: GameSettings;
 }
@@ -137,6 +162,14 @@ export type GameAction =
   | { type: 'STAGE_A_START' }
   | { type: 'STAGE_A_ANSWER'; correct: boolean }
   | { type: 'STAGE_A_FINISH_GROUP' }
+  | { type: 'STAGE_B_SETUP'; pairs: { id: string; playerIds: string[] }[]; questionIds: string[] }
+  | { type: 'STAGE_B_SHOW_PAIRS' }
+  | { type: 'STAGE_B_MATCH_INTRO'; matchIndex: number }
+  | { type: 'STAGE_B_START_ROUND'; round: 0 | 1 }
+  | { type: 'STAGE_B_ANSWER'; correct: boolean }
+  | { type: 'STAGE_B_END_ROUND' }
+  | { type: 'STAGE_B_PICK_WINNER'; pairId: string }
+  | { type: 'STAGE_B_NEXT_MATCH' }
   | { type: 'TIMER_START'; totalMs?: number }
   | { type: 'TIMER_PAUSE' }
   | { type: 'TIMER_RESUME' }
