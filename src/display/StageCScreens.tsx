@@ -1,7 +1,7 @@
 import type { DisplaySnapshot } from '../core/types';
 import { SPECIAL_PER_DUEL, stageCActivePlayerId, totalScore } from '../core/reducer';
 import { formatTime } from '../core/format';
-import { requestImageFromAdmin, useDisplayImage } from './displayImages';
+import { reportBrokenImage, useDisplayImage } from './displayImages';
 import Logo from '../components/Logo';
 
 /** מסכי הקהל של שלב ג' — פוקר פייס + חזיון תעתועים */
@@ -97,7 +97,7 @@ export function StageCImage({ snapshot }: { snapshot: DisplaySnapshot }) {
             className="display-image"
             src={imageUrl}
             alt=""
-            onError={() => questionImageId && requestImageFromAdmin(questionImageId)}
+            onError={() => questionImageId && reportBrokenImage(questionImageId)}
           />
         ) : (
           <div className="display-question">…</div>

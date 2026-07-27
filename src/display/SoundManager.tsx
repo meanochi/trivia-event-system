@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DisplaySnapshot, SyncMessage } from '../core/types';
 import {
   playEffect,
+  playTimerBeat,
   setGenerativeMusicVolume,
   startGenerativeMusic,
   stopGenerativeMusic,
@@ -62,7 +63,7 @@ export default function SoundManager({ snapshot }: { snapshot: DisplaySnapshot |
     }
   }, [snapshot, soundEnabled]);
 
-  // טיימר: טיק-טק וסיום
+  // טיימר: פעימת מתח מתגברת לאורך כל הריצה + צליל סיום
   const prevTimerRef = useRef<{ status: string; sec: number } | null>(null);
   useEffect(() => {
     if (!snapshot) return;
@@ -71,8 +72,9 @@ export default function SoundManager({ snapshot }: { snapshot: DisplaySnapshot |
     const prev = prevTimerRef.current;
     prevTimerRef.current = { status: timer.status, sec };
     if (!soundEnabled || !prev) return;
-    if (timer.status === 'running' && sec !== prev.sec && sec <= 10 && sec > 0) {
-      playEffect('tick');
+    if (timer.status === 'running' && sec !== prev.sec && sec > 0) {
+      const progress = timer.totalMs > 0 ? 1 - timer.remainingMs / timer.totalMs : 0;
+      playTimerBeat(progress, sec <= 10);
     }
     if (timer.status === 'finished' && prev.status === 'running') {
       playEffect('timeup');

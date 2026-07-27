@@ -1,4 +1,5 @@
 import { useAdminStore } from '../core/adminStore';
+import { liveGameScreen } from '../core/reducer';
 import { STAGE_NAMES, type StageId } from '../core/types';
 import ScorePanel from './ScorePanel';
 import StageAPanel from './StageAPanel';
@@ -63,6 +64,19 @@ export default function GameTab() {
         <p className="hint">
           מוצג כעת: <strong>{screenLabel()}</strong>
         </p>
+        {(() => {
+          const live = liveGameScreen(game);
+          const mismatch = live && JSON.stringify(live) !== JSON.stringify(screen);
+          if (!mismatch) return null;
+          return (
+            <div className="next-stage-box">
+              <span>⚠ מסך הקהל לא מציג את המשחק הפעיל!</span>
+              <button className="btn btn-primary" onClick={() => dispatch({ type: 'RESTORE_GAME_SCREEN' })}>
+                📺 חזרה למשחק החי
+              </button>
+            </div>
+          );
+        })()}
         <div className="screen-controls">
           <button
             className={`btn ${screen.kind === 'logo' ? 'btn-pink' : 'btn-outline-pink'}`}

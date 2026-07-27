@@ -210,6 +210,7 @@ export type ScoreChannel = keyof PlayerScore;
 export type GameAction =
   | { type: 'SHOW_LOGO'; subtitle?: string }
   | { type: 'SHOW_STAGE_TITLE'; stage: StageId }
+  | { type: 'RESTORE_GAME_SCREEN' }
   | { type: 'SET_ACTIVE_STAGE'; stage: StageId }
   | { type: 'MANUAL_ADJUST_PLAYER'; playerId: string; delta: number }
   | { type: 'MANUAL_ADJUST_PAIR'; pairId: string; delta: number }
@@ -264,6 +265,6 @@ export type SyncMessage =
   | { type: 'STATE'; snapshot: DisplaySnapshot }
   | { type: 'SYNC_REQUEST' }
   | { type: 'SOUND'; name: 'correct' | 'wrong' | 'tick' | 'timeup' | 'reveal' | 'winner' }
-  /** מסך הקהל מבקש תמונה; האדמין עונה עם ה-Blob (אמין יותר מ-IndexedDB משותף) */
+  /** מסך הקהל מבקש תמונה; האדמין עונה עם data URL — מחרוזת שעוברת בכל סביבה */
   | { type: 'IMAGE_REQUEST'; id: string }
-  | { type: 'IMAGE'; id: string; blob: Blob };
+  | { type: 'IMAGE'; id: string; dataUrl: string };

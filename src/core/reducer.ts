@@ -224,10 +224,55 @@ function withPlayerScore(
   return { ...state, scores: { ...state.scores, [playerId]: update(current) } };
 }
 
+/** מסך המשחק החי לפי מצב השלב הפעיל — לחזרה אחרי שהמפעיל שוטט במסכים אחרים */
+export function liveGameScreen(state: GameState): GameState['publicScreen'] | null {
+  switch (state.activeStage) {
+    case 'A':
+      if (state.stageA.run?.phase === 'playing') return { kind: 'stageA-question' };
+      if (state.stageA.run?.phase === 'intro')
+        return { kind: 'stageA-intro', groupId: state.stageA.run.groupId };
+      if (state.stageA.run?.phase === 'summary')
+        return { kind: 'stageA-summary', groupId: state.stageA.run.groupId };
+      return null;
+    case 'B': {
+      const b = state.stageB;
+      if (b.matchPhase === 'round')
+        return { kind: 'stageB-round', matchIndex: b.matchIndex, round: b.activeRound };
+      if (b.matchPhase === 'intro') return { kind: 'stageB-match-intro', matchIndex: b.matchIndex };
+      if (b.matchPhase === 'between' || b.matchPhase === 'summary')
+        return { kind: 'stageB-match-summary', matchIndex: b.matchIndex };
+      if (b.pairs.length > 0) return { kind: 'stageB-pairs' };
+      return null;
+    }
+    case 'C': {
+      const c = state.stageC;
+      if (c.phase === 'special') return { kind: 'stageC-special' };
+      if (c.phase === 'images') return { kind: 'stageC-image' };
+      if (c.phase === 'intro') return { kind: 'stageC-duel-intro', duelIndex: c.duelIndex };
+      if (c.phase === 'summary') return { kind: 'stageC-duel-summary', duelIndex: c.duelIndex };
+      return null;
+    }
+    case 'D': {
+      const d = state.stageD;
+      if (d.phase === 'round') return { kind: 'stageD-round', roundIndex: d.roundIndex };
+      if (d.phase === 'winner') return { kind: 'stageD-winner' };
+      if (d.phase === 'reveal') return { kind: 'stageD-finalists' };
+      if (d.phase === 'between' || d.phase === 'summary') return { kind: 'stageD-summary' };
+      return null;
+    }
+  }
+}
+
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'SHOW_LOGO':
       return { ...state, publicScreen: { kind: 'logo', subtitle: action.subtitle } };
+
+    case 'RESTORE_GAME_SCREEN': {
+      const live = liveGameScreen(state);
+      if (!live) return state;
+      return { ...state, publicScreen: live };
+    }
 
     case 'SHOW_STAGE_TITLE':
       return { ...state, publicScreen: { kind: 'stage-title', stage: action.stage } };

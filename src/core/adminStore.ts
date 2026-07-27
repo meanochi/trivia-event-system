@@ -166,7 +166,15 @@ channel.addEventListener('message', (e: MessageEvent<SyncMessage>) => {
     if (!loaded) return;
     const id = e.data.id;
     void loadImage(id).then((blob) => {
-      if (blob) channel.postMessage({ type: 'IMAGE', id, blob } satisfies SyncMessage);
+      if (!blob) return;
+      // data URL — מחרוזת פשוטה שעוברת בכל סביבה, בלי תלות ב-Blobs בין חלונות
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          channel.postMessage({ type: 'IMAGE', id, dataUrl: reader.result } satisfies SyncMessage);
+        }
+      };
+      reader.readAsDataURL(blob);
     });
   }
 });

@@ -76,18 +76,28 @@ export function playEffect(name: SoundName): void {
     const c = ac();
     switch (name) {
       case 'correct':
-        tone(c, { freq: 880, dur: 0.12, type: 'triangle', vol: 0.3 });
-        tone(c, { freq: 1318, at: 0.09, dur: 0.22, type: 'triangle', vol: 0.3 });
+        // סטינגר עולה מנצח — שלוש פעימות מהירות + נצנוץ
+        tone(c, { freq: 659, dur: 0.09, type: 'triangle', vol: 0.3 });
+        tone(c, { freq: 880, at: 0.07, dur: 0.09, type: 'triangle', vol: 0.32 });
+        tone(c, { freq: 1318, at: 0.14, dur: 0.3, type: 'triangle', vol: 0.34 });
+        tone(c, { freq: 2637, at: 0.16, dur: 0.22, type: 'sine', vol: 0.12 });
         break;
       case 'wrong':
-        tone(c, { freq: 170, dur: 0.32, type: 'sawtooth', vol: 0.25, sweepTo: 110 });
+        // צורם ומתוח — שני מתנדים צורמים יורדים יחד
+        tone(c, { freq: 196, dur: 0.42, type: 'sawtooth', vol: 0.2, sweepTo: 98 });
+        tone(c, { freq: 208, dur: 0.42, type: 'sawtooth', vol: 0.2, sweepTo: 104 });
+        tone(c, { freq: 98, at: 0.02, dur: 0.4, type: 'triangle', vol: 0.18, sweepTo: 55 });
         break;
       case 'tick':
         tone(c, { freq: 1050, dur: 0.045, type: 'square', vol: 0.12 });
         break;
       case 'timeup':
-        tone(c, { freq: 520, dur: 0.75, type: 'triangle', vol: 0.32, sweepTo: 120 });
-        tone(c, { freq: 260, at: 0.05, dur: 0.75, type: 'sawtooth', vol: 0.14, sweepTo: 60 });
+        // בום עמוק + אזעקה משולשת — סוף זמן דרמטי
+        tone(c, { freq: 90, dur: 1.0, type: 'sine', vol: 0.4, sweepTo: 45 });
+        [0, 0.22, 0.44].forEach((at) => {
+          tone(c, { freq: 466, at, dur: 0.16, type: 'square', vol: 0.2 });
+          tone(c, { freq: 622, at, dur: 0.16, type: 'square', vol: 0.14 });
+        });
         break;
       case 'reveal':
         [523, 659, 784, 1046].forEach((f, i) =>
@@ -139,6 +149,28 @@ export function playEffect(name: SoundName): void {
     }
   } catch {
     // אודיו לא זמין — ממשיכים בשקט
+  }
+}
+
+/**
+ * פעימת הטיימר — "דופק" מתוח שמתחזק ומאיץ לקראת הסוף.
+ * progress: 0 (התחלה) עד 1 (סוף הזמן). urgent: 10 השניות האחרונות.
+ */
+export function playTimerBeat(progress: number, urgent: boolean): void {
+  window.__lastSound = 'beat';
+  try {
+    const c = ac();
+    const vol = 0.05 + progress * 0.2;
+    const freq = 130 + progress * 50;
+    // פעימה ראשית — "תוף לב"
+    tone(c, { freq, dur: 0.1, type: 'sine', vol, sweepTo: freq * 0.6 });
+    if (urgent) {
+      // דופק כפול + טיק מתכתי — מתח שיא
+      tone(c, { freq: freq * 1.1, at: 0.14, dur: 0.08, type: 'sine', vol: vol * 0.8, sweepTo: freq * 0.7 });
+      tone(c, { freq: 1250, at: 0.02, dur: 0.04, type: 'square', vol: 0.14 });
+    }
+  } catch {
+    // אודיו לא זמין
   }
 }
 

@@ -23,6 +23,7 @@ import {
 } from './StageDScreens';
 import SoundManager from './SoundManager';
 import AmbientBackground from './AmbientBackground';
+import AnswerFlash from './AnswerFlash';
 import './display.css';
 
 /**
@@ -45,6 +46,7 @@ export default function DisplayApp() {
       <AmbientBackground />
       <SoundManager snapshot={snapshot} />
       <TransitionFlash screenKind={snapshot?.game.publicScreen.kind ?? null} />
+      <AnswerFlash />
       <Screen snapshot={snapshot} />
     </>
   );
