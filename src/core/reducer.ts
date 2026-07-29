@@ -293,6 +293,51 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.patch } };
 
+    case 'APPEND_STAGE_QUESTIONS': {
+      // שאלות שנוספו למאגר באמצע משחק מצטרפות לסבב הפעיל מיד
+      const merge = (existing: string[], cap?: number) => {
+        const have = new Set(existing);
+        const fresh = action.questionIds.filter((id) => !have.has(id));
+        if (fresh.length === 0) return null;
+        const merged = [...existing, ...fresh];
+        return cap ? merged.slice(0, cap) : merged;
+      };
+      switch (action.kind) {
+        case 'stageA': {
+          const run = state.stageA.run;
+          if (!run || run.phase === 'summary') return state;
+          const merged = merge(run.questionIds, 35);
+          if (!merged || merged.length === run.questionIds.length) return state;
+          return { ...state, stageA: { ...state.stageA, run: { ...run, questionIds: merged } } };
+        }
+        case 'stageB': {
+          if (state.stageB.pairs.length === 0) return state;
+          const merged = merge(state.stageB.questionIds);
+          if (!merged) return state;
+          return { ...state, stageB: { ...state.stageB, questionIds: merged } };
+        }
+        case 'stageC-special': {
+          if (state.stageC.duels.length === 0) return state;
+          const merged = merge(state.stageC.specialQuestionIds);
+          if (!merged) return state;
+          return { ...state, stageC: { ...state.stageC, specialQuestionIds: merged } };
+        }
+        case 'stageC-image': {
+          if (state.stageC.duels.length === 0) return state;
+          const merged = merge(state.stageC.imageQuestionIds);
+          if (!merged) return state;
+          return { ...state, stageC: { ...state.stageC, imageQuestionIds: merged } };
+        }
+        case 'stageD': {
+          if (state.stageD.finalistIds.length === 0) return state;
+          const merged = merge(state.stageD.questionIds);
+          if (!merged) return state;
+          return { ...state, stageD: { ...state.stageD, questionIds: merged } };
+        }
+      }
+      return state;
+    }
+
     case 'STAGE_A_LOAD_GROUP': {
       const run = {
         groupId: action.groupId,

@@ -132,6 +132,18 @@ export const useAdminStore = create<AdminStore>((set, get) => {
         type: 'STATE',
         snapshot: snapshotOf(get().game, next),
       } satisfies SyncMessage);
+      // שאלות שנוספו באמצע משחק מצטרפות לסבב הפעיל — ה-Reducer מסנן כפילויות
+      // ומתעלם משלבים שאינם פעילים, כך שקריאה מיותרת אינה משנה דבר
+      const kinds = ['stageA', 'stageB', 'stageC-special', 'stageC-image', 'stageD'] as const;
+      for (const kind of kinds) {
+        const questionIds = next.questions
+          .filter((q) => q.kind === kind && !q.used)
+          .sort((a, b) => a.order - b.order)
+          .map((q) => q.id);
+        if (questionIds.length > 0) {
+          get().dispatch({ type: 'APPEND_STAGE_QUESTIONS', kind, questionIds });
+        }
+      }
     },
   };
 });

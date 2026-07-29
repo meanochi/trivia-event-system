@@ -215,6 +215,8 @@ export type GameAction =
   | { type: 'MANUAL_ADJUST_PLAYER'; playerId: string; delta: number }
   | { type: 'MANUAL_ADJUST_PAIR'; pairId: string; delta: number }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<GameSettings> }
+  /** צירוף שאלות שנוספו למאגר באמצע משחק אל הסבב הפעיל */
+  | { type: 'APPEND_STAGE_QUESTIONS'; kind: QuestionKind; questionIds: string[] }
   | { type: 'STAGE_A_LOAD_GROUP'; groupId: GroupId; playerIds: string[]; questionIds: string[] }
   | { type: 'STAGE_A_START' }
   | { type: 'STAGE_A_ANSWER'; correct: boolean }
