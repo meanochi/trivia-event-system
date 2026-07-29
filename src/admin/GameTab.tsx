@@ -1,6 +1,7 @@
 import { useAdminStore } from '../core/adminStore';
 import { liveGameScreen } from '../core/reducer';
 import { STAGE_NAMES, type StageId } from '../core/types';
+import { useAnswerHotkeys } from './useAnswerHotkeys';
 import ScorePanel from './ScorePanel';
 import StageAPanel from './StageAPanel';
 import StageBPanel from './StageBPanel';
@@ -17,6 +18,7 @@ const STAGE_LETTERS: Record<StageId, string> = { A: 'א', B: 'ב', C: 'ג', D: '
 export default function GameTab() {
   const { game, dispatch } = useAdminStore();
   const screen = game.publicScreen;
+  useAnswerHotkeys();
 
   function screenLabel(): string {
     switch (screen.kind) {
@@ -99,6 +101,7 @@ export default function GameTab() {
             </button>
           ))}
         </div>
+        <p className="hint keys-hint">⌨ קיצור מקלדת בזמן שאלה: חץ למעלה ↑ נכון · חץ למטה ↓ שגוי</p>
       </section>
 
       {game.activeStage === 'A' && <StageAPanel />}

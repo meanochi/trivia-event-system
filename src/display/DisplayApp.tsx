@@ -88,7 +88,43 @@ export default function DisplayApp() {
       <TransitionFlash screenKind={snapshot?.game.publicScreen.kind ?? null} />
       <AnswerFlash />
       <Screen snapshot={snapshot} />
+      <FullscreenToggle />
     </>
+  );
+}
+
+/** מסך מלא אמיתי — בלי מסגרת חלון וכפתורי דפדפן. לחיצה כפולה בכל מקום או על הכפתור בפינה. */
+function FullscreenToggle() {
+  const [fs, setFs] = useState<boolean>(() => !!document.fullscreenElement);
+
+  useEffect(() => {
+    const onChange = () => setFs(!!document.fullscreenElement);
+    const toggle = () => {
+      if (document.fullscreenElement) void document.exitFullscreen();
+      else void document.documentElement.requestFullscreen().catch(() => {});
+    };
+    const onDblClick = () => toggle();
+    document.addEventListener('fullscreenchange', onChange);
+    window.addEventListener('dblclick', onDblClick);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      window.removeEventListener('dblclick', onDblClick);
+    };
+  }, []);
+
+  function toggle() {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen().catch(() => {});
+  }
+
+  return (
+    <button
+      className="fullscreen-btn"
+      onClick={toggle}
+      title={fs ? 'יציאה ממסך מלא (או Esc)' : 'מסך מלא (או לחיצה כפולה)'}
+    >
+      {fs ? '🗗' : '⛶'}
+    </button>
   );
 }
 

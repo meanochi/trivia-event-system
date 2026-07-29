@@ -8,6 +8,7 @@ import {
 } from '../core/reducer';
 import { formatTime } from '../core/format';
 import { GROUP_IDS, type Player } from '../core/types';
+import QuickAddQuestion from './QuickAddQuestion';
 
 /** שלב ב' — ראש בראש: מעבר משלב א', ניהול מקצים וסבבים */
 export default function StageBPanel() {
@@ -337,6 +338,7 @@ function MatchPanel() {
           {pairLabel(pairA)}: <strong>{pairA.score}</strong> · {pairLabel(pairB)}:{' '}
           <strong>{pairB.score}</strong>
         </div>
+        <QuickAddQuestion kind="stageB" />
       </section>
     );
   }

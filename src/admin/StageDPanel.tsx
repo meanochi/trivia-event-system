@@ -7,6 +7,7 @@ import {
 } from '../core/reducer';
 import { formatTime } from '../core/format';
 import type { Player } from '../core/types';
+import QuickAddQuestion from './QuickAddQuestion';
 
 /** שלב ד' — הגמר הגדול */
 export default function StageDPanel() {
@@ -214,6 +215,7 @@ function FinalePanel() {
         </div>
 
         <FinaleStandings finalists={finalists} />
+        <QuickAddQuestion kind="stageD" />
       </section>
     );
   }

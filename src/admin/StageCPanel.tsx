@@ -9,6 +9,7 @@ import {
 import { formatTime } from '../core/format';
 import { useImageUrl } from '../core/useImageUrl';
 import type { Player } from '../core/types';
+import QuickAddQuestion from './QuickAddQuestion';
 
 /** שלב ג' — פוקר פייס + חזיון תעתועים */
 export default function StageCPanel() {
@@ -257,6 +258,7 @@ function DuelPanel() {
           </>
         )}
         <DuelScoreLine players={players} />
+        <QuickAddQuestion kind="stageC-special" />
       </section>
     );
   }
@@ -368,6 +370,7 @@ function ImagesPart({ players, duelNum }: { players: Player[]; duelNum: number }
       </div>
 
       <DuelScoreLine players={players} />
+      <QuickAddQuestion kind="stageC-image" />
     </section>
   );
 }

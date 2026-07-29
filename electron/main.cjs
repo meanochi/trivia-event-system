@@ -95,10 +95,12 @@ async function createWindows() {
   displayWin.setMenuBarVisibility(false);
   await displayWin.loadURL(`${base}/display`);
 
-  // F12 פותח כלי פיתוח (לאבחון תקלות בשטח)
+  // F12 פותח כלי פיתוח (לאבחון תקלות בשטח); F11 מחליף מסך מלא
   for (const win of [adminWin, displayWin]) {
     win.webContents.on('before-input-event', (_e, input) => {
-      if (input.type === 'keyDown' && input.key === 'F12') win.webContents.toggleDevTools();
+      if (input.type !== 'keyDown') return;
+      if (input.key === 'F12') win.webContents.toggleDevTools();
+      if (input.key === 'F11') win.setFullScreen(!win.isFullScreen());
     });
   }
 

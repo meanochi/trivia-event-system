@@ -1,6 +1,7 @@
 import { useAdminStore } from '../core/adminStore';
 import { stageAActivePlayerId, stageACurrentQuestionId, totalScore } from '../core/reducer';
 import { GROUP_IDS, type GroupId, type Player } from '../core/types';
+import QuickAddQuestion from './QuickAddQuestion';
 
 const QUESTIONS_PER_GROUP = 35;
 
@@ -19,7 +20,14 @@ export default function StageAPanel() {
     );
   }
   if (run.phase === 'intro') return <IntroPanel />;
-  return <PlayingPanel />;
+  // ההוספה המהירה מחוץ ל-PlayingPanel: הפאנל מוגדר כפונקציה מקוננת ולכן
+  // מתרכב מחדש בכל עדכון מצב — רכיב חיצוני שומר על הטופס הפתוח והטקסט
+  return (
+    <>
+      <PlayingPanel />
+      <QuickAddQuestion kind="stageA" standalone />
+    </>
+  );
 
   /* ===== בחירת קבוצה ===== */
 

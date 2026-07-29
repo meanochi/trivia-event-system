@@ -628,3 +628,27 @@
   font-size: 0.95rem;
 }
 .volume-label input[type='range'] { accent-color: var(--pink); width: 9rem; }
+
+/* ===== הוספת שאלה מהירה מתוך מהלך המשחק ===== */
+.quick-add {
+  margin-block-start: 1rem;
+  padding-block-start: 0.7rem;
+  border-block-start: 1px dashed var(--panel-line);
+}
+.quick-add-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.quick-add-msg {
+  color: var(--green-soft);
+  font-weight: 700;
+}
+.quick-add-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-block-start: 0.6rem;
+}
+.keys-hint { margin-block-start: 0.6rem; }
