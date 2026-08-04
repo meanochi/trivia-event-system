@@ -280,6 +280,24 @@ async function filesFromDrop(dt: DataTransfer): Promise<File[]> {
   return out;
 }
 
+/** האם הקובץ הוא תמונה שהדפדפן יודע להציג — לפי סוג MIME או סיומת.
+ *  ב-Windows קבצים לעיתים מגיעים ללא סוג, ולכן הסיומת קובעת גם היא. */
+export function isRenderableImage(f: File): boolean {
+  if (f.type.startsWith('image/') && !/hei[cf]/i.test(f.type)) return true;
+  return /\.(png|jpe?g|gif|webp|bmp|avif|svg)$/i.test(f.name);
+}
+
+/** הסבר קריא למה קבצים דולגו בהעלאה */
+export function skippedFilesMessage(skipped: File[]): string {
+  const names = skipped.slice(0, 8).map((f) => f.name).join('\n');
+  const more = skipped.length > 8 ? `\n…ועוד ${skipped.length - 8}` : '';
+  return (
+    `הקבצים הבאים אינם תמונות נתמכות ולא הועלו:\n${names}${more}\n\n` +
+    'נתמכים: JPG, PNG, GIF, WEBP, BMP, AVIF, SVG.\n' +
+    'תמונות HEIC (של אייפון) יש להמיר קודם ל-JPG.'
+  );
+}
+
 function ImagePool({ pool }: { pool: PoolInfo }) {
   const { content, updateContent } = useAdminStore();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -297,8 +315,9 @@ function ImagePool({ pool }: { pool: PoolInfo }) {
     try {
       // מיון לפי שם קובץ — קובע את סדר ההצגה במשחק
       const sorted = files
-        .filter((f) => f.type.startsWith('image/'))
+        .filter(isRenderableImage)
         .sort((a, b) => a.name.localeCompare(b.name, 'he', { numeric: true }));
+      const skipped = files.filter((f) => !isRenderableImage(f));
       let order = questions.length === 0 ? 1 : Math.max(...questions.map((q) => q.order)) + 1;
       const added: Question[] = [];
       for (const file of sorted) {
@@ -315,7 +334,16 @@ function ImagePool({ pool }: { pool: PoolInfo }) {
           used: false,
         });
       }
-      updateContent((c) => ({ ...c, questions: [...c.questions, ...added] }));
+      if (added.length > 0) {
+        updateContent((c) => ({ ...c, questions: [...c.questions, ...added] }));
+      }
+      // כישלון שקט הוא הגרוע מכל — המפעיל חייב לדעת מה דולג ולמה
+      if (skipped.length > 0) window.alert(skippedFilesMessage(skipped));
+    } catch (err) {
+      window.alert(
+        `העלאת התמונות נכשלה: ${err instanceof Error ? err.message : String(err)}\n\n` +
+          'נסו שוב. אם זה חוזר — ודאו שהדפדפן אינו במצב גלישה בסתר ושיש מקום פנוי בדיסק.',
+      );
     } finally {
       setBusy(false);
     }

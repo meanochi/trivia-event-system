@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useAdminStore } from '../core/adminStore';
 import { newId } from '../core/format';
 import { saveImage } from '../core/db';
+import { isRenderableImage, skippedFilesMessage } from './QuestionsTab';
 import type { Question, QuestionKind } from '../core/types';
 
 /**
@@ -50,27 +51,34 @@ export default function QuickAddQuestion({ kind, standalone = false }: { kind: Q
   }
 
   async function addImages(files: File[]) {
-    const images = files
-      .filter((f) => f.type.startsWith('image/'))
-      .sort((a, b) => a.name.localeCompare(b.name, 'he', { numeric: true }));
-    if (images.length === 0) return;
-    let order = nextOrder();
-    const added: Question[] = [];
-    for (const file of images) {
-      const imageId = newId('img');
-      await saveImage(imageId, file);
-      added.push({
-        id: newId('q'),
-        kind,
-        text: '',
-        answer: file.name.replace(/\.[^.]+$/, ''),
-        imageId,
-        order: order++,
-        used: false,
-      });
+    try {
+      const images = files
+        .filter(isRenderableImage)
+        .sort((a, b) => a.name.localeCompare(b.name, 'he', { numeric: true }));
+      const skipped = files.filter((f) => !isRenderableImage(f));
+      let order = nextOrder();
+      const added: Question[] = [];
+      for (const file of images) {
+        const imageId = newId('img');
+        await saveImage(imageId, file);
+        added.push({
+          id: newId('q'),
+          kind,
+          text: '',
+          answer: file.name.replace(/\.[^.]+$/, ''),
+          imageId,
+          order: order++,
+          used: false,
+        });
+      }
+      if (added.length > 0) {
+        updateContent((c) => ({ ...c, questions: [...c.questions, ...added] }));
+        flash(`✓ נוספו ${added.length} תמונות והצטרפו לסבב`);
+      }
+      if (skipped.length > 0) window.alert(skippedFilesMessage(skipped));
+    } catch (err) {
+      window.alert(`העלאת התמונות נכשלה: ${err instanceof Error ? err.message : String(err)}`);
     }
-    updateContent((c) => ({ ...c, questions: [...c.questions, ...added] }));
-    flash(`✓ נוספו ${added.length} תמונות והצטרפו לסבב`);
   }
 
   return (

@@ -10,10 +10,14 @@ export default function SettingsTab() {
 
   function uploadMusic(file: File) {
     const id = newId('music');
-    void saveImage(id, file).then(() => {
-      if (settings.musicTrackId) void deleteImage(settings.musicTrackId);
-      dispatch({ type: 'UPDATE_SETTINGS', patch: { musicTrackId: id } });
-    });
+    saveImage(id, file)
+      .then(() => {
+        if (settings.musicTrackId) void deleteImage(settings.musicTrackId);
+        dispatch({ type: 'UPDATE_SETTINGS', patch: { musicTrackId: id } });
+      })
+      .catch((err: unknown) => {
+        window.alert(`העלאת קובץ המוזיקה נכשלה: ${err instanceof Error ? err.message : String(err)}`);
+      });
   }
 
   return (
