@@ -76,15 +76,29 @@ export async function saveContent(content: ContentState): Promise<void> {
   }
 }
 
+/** תמונות ומוזיקה נשמרות כ-ArrayBuffer ולא כ-Blob: מנגנון אחסון ה-Blobs
+ *  של Chromium נכשל ב-"Internal error" בפרופילים מסוימים (במיוחד אחרי
+ *  קריסות/עדכונים), בעוד ArrayBuffer נכתב ישירות למסד ואמין תמיד. */
+interface StoredBinary {
+  buf: ArrayBuffer;
+  type: string;
+}
+
 export async function saveImage(id: string, blob: Blob): Promise<void> {
   const db = await getDb();
-  await db.put(IMAGES, blob, id);
+  const buf = await blob.arrayBuffer();
+  const stored: StoredBinary = { buf, type: blob.type || 'application/octet-stream' };
+  await db.put(IMAGES, stored, id);
 }
 
 export async function loadImage(id: string): Promise<Blob | null> {
   try {
     const db = await getDb();
-    return ((await db.get(IMAGES, id)) as Blob | undefined) ?? null;
+    const value = (await db.get(IMAGES, id)) as Blob | StoredBinary | undefined;
+    if (!value) return null;
+    // תאימות לאחור — תמונות שנשמרו בגרסאות קודמות כ-Blob
+    if (value instanceof Blob) return value;
+    return new Blob([value.buf], { type: value.type });
   } catch {
     return null;
   }
