@@ -264,18 +264,20 @@
 
 .stageb-layout {
   display: grid;
-  /* שמות השחקנים גבוה — מתחת לכותרת ומעל השאלה (order קובע את הסדר) */
-  grid-template-rows: auto auto 1fr;
-  gap: 1.2rem;
+  /* כמו בשלב א': שמות השחקנים בעמודת צד, לצד השאלה */
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr minmax(18rem, 26vw);
+  grid-template-areas:
+    'top top'
+    'main names';
+  gap: 1.5rem;
 }
 .stageb-top {
+  grid-area: top;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  order: 0;
 }
-.stageb-pairs-bar { order: 1; }
-.stageb-main { order: 2; }
 .display-timer {
   font-family: var(--font-display);
   font-size: 4.4rem;
@@ -299,14 +301,17 @@
   font-weight: 800;
 }
 .stageb-main {
+  grid-area: main;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 2rem;
 }
 .stageb-pairs-bar {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-area: names;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   gap: 1.2rem;
 }
 .pair-score-box {
