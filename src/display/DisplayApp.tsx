@@ -89,6 +89,8 @@ export default function DisplayApp() {
       <AnswerFlash />
       <Screen snapshot={snapshot} />
       <FullscreenToggle />
+      {/* באלקטרון החלון חסר מסגרת — רצועה שקופה בראש הדף מאפשרת גרירה */}
+      {navigator.userAgent.includes('Electron') && <div className="drag-strip" aria-hidden="true" />}
     </>
   );
 }
@@ -104,11 +106,20 @@ function FullscreenToggle() {
       else void document.documentElement.requestFullscreen().catch(() => {});
     };
     const onDblClick = () => toggle();
+    // F11 — אותה התנהגות בדפדפן ובאלקטרון (מסך מלא של החלון)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'F11') {
+        e.preventDefault();
+        toggle();
+      }
+    };
     document.addEventListener('fullscreenchange', onChange);
     window.addEventListener('dblclick', onDblClick);
+    window.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('fullscreenchange', onChange);
       window.removeEventListener('dblclick', onDblClick);
+      window.removeEventListener('keydown', onKey);
     };
   }, []);
 

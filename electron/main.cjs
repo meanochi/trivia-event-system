@@ -87,20 +87,22 @@ async function createWindows() {
           title: 'פונקט פארקערט — מסך קהל',
         }
       : {
+          // גם במסך יחיד: בלי שורת כותרת וכפתורי חלון (frameless).
+          // גרירה: רצועה שקופה בראש הדף (‎-webkit-app-region‎); F11 למסך מלא
           width: Math.min(1280, primary.workArea.width - 160),
           height: Math.min(720, primary.workArea.height - 160),
+          frame: false,
           title: 'פונקט פארקערט — מסך קהל',
         },
   );
   displayWin.setMenuBarVisibility(false);
   await displayWin.loadURL(`${base}/display`);
 
-  // F12 פותח כלי פיתוח (לאבחון תקלות בשטח); F11 מחליף מסך מלא
+  // F12 פותח כלי פיתוח (לאבחון תקלות בשטח); F11 מטופל בתוך דף מסך הקהל
   for (const win of [adminWin, displayWin]) {
     win.webContents.on('before-input-event', (_e, input) => {
-      if (input.type !== 'keyDown') return;
+      if (input.type !== 'keyDown' && input.type !== 'rawKeyDown') return;
       if (input.key === 'F12') win.webContents.toggleDevTools();
-      if (input.key === 'F11') win.setFullScreen(!win.isFullScreen());
     });
   }
 

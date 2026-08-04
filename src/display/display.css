@@ -497,6 +497,12 @@
 .fullscreen-btn:focus-visible {
   opacity: 1;
 }
+/* רמז גילוי: הכפתור נראה היטב בשניות הראשונות ואז דוהה */
+@keyframes fs-hint {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0.18; }
+}
+.fullscreen-btn { animation: fs-hint 6s ease; }
 
 /* ===== חשיפת זוגות הדרגתית ===== */
 .pairs-tease {
@@ -519,4 +525,14 @@
   animation: pop-in 0.55s backwards;
   border-color: var(--yellow);
   box-shadow: 0 0 24px rgba(255, 227, 0, 0.35);
+}
+
+/* רצועת גרירה לחלון ללא מסגרת (אלקטרון) — שקופה, מתחת לכפתור המסך המלא */
+.drag-strip {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 1.6rem;
+  z-index: 40;
+  -webkit-app-region: drag;
 }
