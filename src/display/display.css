@@ -497,3 +497,26 @@
 .fullscreen-btn:focus-visible {
   opacity: 1;
 }
+
+/* ===== חשיפת זוגות הדרגתית ===== */
+.pairs-tease {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--yellow);
+  margin-block-end: 0.6rem;
+  animation: pop-in 0.5s backwards;
+}
+.pair-box.mystery {
+  border-style: dashed;
+  opacity: 0.55;
+  justify-content: center;
+}
+.pair-box.mystery .pair-box-name {
+  font-size: 2rem;
+  color: var(--muted);
+}
+.pair-box.revealing {
+  animation: pop-in 0.55s backwards;
+  border-color: var(--yellow);
+  box-shadow: 0 0 24px rgba(255, 227, 0, 0.35);
+}

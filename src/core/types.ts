@@ -111,6 +111,8 @@ export interface StageBPair {
   playerIds: string[];
   /** הניקוד בשלב זה הוא לזוג בלבד */
   score: number;
+  /** תוספת ידנית של המפעיל — מוסתרת מהקהל עד סיכום המקצה */
+  manualScore: number;
 }
 
 export type StageBMatchPhase = 'none' | 'intro' | 'round' | 'between' | 'summary';
@@ -118,6 +120,8 @@ export type StageBMatchPhase = 'none' | 'intro' | 'round' | 'between' | 'summary
 export interface StageBState {
   /** 6 הזוגות לאחר אישור המפעיל; ריק = טרם בוצע המעבר משלב א' */
   pairs: StageBPair[];
+  /** כמה זוגות כבר נחשפו לקהל על לוח הזוגות — החלוקה נחשפת זוג-זוג */
+  revealedPairs: number;
   /** מאגר השאלות שנתפס באישור הזוגות, לפי סדר */
   questionIds: string[];
   /** מצביע השאלה הבאה (משותף לכל המקצים) */
@@ -224,6 +228,7 @@ export type GameAction =
   | { type: 'STAGE_A_FINISH_GROUP' }
   | { type: 'STAGE_B_SETUP'; pairs: { id: string; playerIds: string[] }[]; questionIds: string[] }
   | { type: 'STAGE_B_SHOW_PAIRS' }
+  | { type: 'STAGE_B_REVEAL_PAIR' }
   | { type: 'STAGE_B_MATCH_INTRO'; matchIndex: number }
   | { type: 'STAGE_B_START_ROUND'; round: 0 | 1 }
   | { type: 'STAGE_B_ANSWER'; correct: boolean }

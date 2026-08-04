@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAdminStore } from '../core/adminStore';
 import {
+  pairTotalScore,
   stageBActivePair,
   stageBCurrentQuestionId,
   stageBMatchPairs,
@@ -245,9 +246,20 @@ function MatchPanel() {
           <strong>{pairLabel(pairA)}</strong> מול <strong>{pairLabel(pairB)}</strong>
         </div>
         <div className="screen-controls">
-          <button className="btn" onClick={() => dispatch({ type: 'STAGE_B_SHOW_PAIRS' })}>
-            הצג את כל הזוגות לקהל
-          </button>
+          {b.revealedPairs < b.pairs.length ? (
+            <>
+              <button className="btn" onClick={() => dispatch({ type: 'STAGE_B_SHOW_PAIRS' })}>
+                הצג את לוח הזוגות לקהל
+              </button>
+              <button className="btn btn-pink" onClick={() => dispatch({ type: 'STAGE_B_REVEAL_PAIR' })}>
+                🎭 חשוף את זוג {b.revealedPairs + 1} ({b.revealedPairs}/{b.pairs.length} נחשפו)
+              </button>
+            </>
+          ) : (
+            <button className="btn" onClick={() => dispatch({ type: 'STAGE_B_SHOW_PAIRS' })}>
+              הצג את כל הזוגות לקהל
+            </button>
+          )}
           <button
             className="btn"
             onClick={() => dispatch({ type: 'STAGE_B_MATCH_INTRO', matchIndex: b.matchIndex })}
@@ -335,8 +347,8 @@ function MatchPanel() {
         </div>
 
         <div className="match-score-line">
-          {pairLabel(pairA)}: <strong>{pairA.score}</strong> · {pairLabel(pairB)}:{' '}
-          <strong>{pairB.score}</strong>
+          {pairLabel(pairA)}: <strong>{pairTotalScore(pairA)}</strong> · {pairLabel(pairB)}:{' '}
+          <strong>{pairTotalScore(pairB)}</strong>
         </div>
         <QuickAddQuestion kind="stageB" />
       </section>
@@ -349,8 +361,8 @@ function MatchPanel() {
       <section className="panel">
         <h2 className="section-title">מקצה {matchNum} — סיום סבב ראשון</h2>
         <div className="match-score-line">
-          {pairLabel(pairA)}: <strong>{pairA.score}</strong> · {pairLabel(pairB)}:{' '}
-          <strong>{pairB.score}</strong>
+          {pairLabel(pairA)}: <strong>{pairTotalScore(pairA)}</strong> · {pairLabel(pairB)}:{' '}
+          <strong>{pairTotalScore(pairB)}</strong>
         </div>
         <div className="screen-controls">
           <button
@@ -366,15 +378,15 @@ function MatchPanel() {
 
   /* --- סיכום מקצה --- */
   const winner = b.winners[b.matchIndex];
-  const tie = pairA.score === pairB.score;
-  const suggested = pairA.score > pairB.score ? pairA.id : pairB.id;
+  const tie = pairTotalScore(pairA) === pairTotalScore(pairB);
+  const suggested = pairTotalScore(pairA) > pairTotalScore(pairB) ? pairA.id : pairB.id;
 
   return (
     <section className="panel">
       <h2 className="section-title">סיכום מקצה {matchNum}</h2>
       <div className="match-score-line big">
-        {pairLabel(pairA)}: <strong>{pairA.score}</strong> · {pairLabel(pairB)}:{' '}
-        <strong>{pairB.score}</strong>
+        {pairLabel(pairA)}: <strong>{pairTotalScore(pairA)}</strong> · {pairLabel(pairB)}:{' '}
+        <strong>{pairTotalScore(pairB)}</strong>
       </div>
       {tie && !winner && (
         <p className="hint warn-text">

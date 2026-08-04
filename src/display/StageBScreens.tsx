@@ -1,5 +1,5 @@
 import type { DisplaySnapshot, StageBPair } from '../core/types';
-import { stageBActivePair } from '../core/reducer';
+import { pairTotalScore, stageBActivePair } from '../core/reducer';
 import { formatTime } from '../core/format';
 import Logo from '../components/Logo';
 
@@ -19,18 +19,30 @@ function matchPairs(snapshot: DisplaySnapshot, matchIndex: number) {
 
 export function StageBPairs({ snapshot }: { snapshot: DisplaySnapshot }) {
   const names = usePairNames(snapshot);
-  const pairs = snapshot.game.stageB.pairs;
+  const { pairs, revealedPairs } = snapshot.game.stageB;
+
+  // חלוקת הזוגות נחשפת זוג-זוג — זוג שטרם נחשף מוצג כקלף מסתורין
+  const box = (idx: number) =>
+    idx < revealedPairs ? (
+      <PairBox key={`revealed-${idx}`} names={names(pairs[idx])} revealing={idx === revealedPairs - 1} />
+    ) : (
+      <div key={`mystery-${idx}`} className="pair-box mystery" aria-hidden="true">
+        <span className="pair-box-name">?</span>
+      </div>
+    );
+
   return (
     <div className="display-screen center">
       <div className="stage-kicker">ראש בראש — הזוגות</div>
+      {revealedPairs === 0 && <div className="pairs-tease">מי ישחק עם מי?…</div>}
       <div className="pairs-board">
         {[0, 1, 2].map((m) => (
           <div key={m} className="pairs-match" style={{ animationDelay: `${m * 0.2}s` }}>
             <div className="pairs-match-label">מקצה {m + 1}</div>
             <div className="pairs-match-row">
-              <PairBox names={names(pairs[m * 2])} />
+              {box(m * 2)}
               <span className="vs">מול</span>
-              <PairBox names={names(pairs[m * 2 + 1])} />
+              {box(m * 2 + 1)}
             </div>
           </div>
         ))}
@@ -125,7 +137,7 @@ export function StageBMatchSummary({
             }`}
           >
             <PairBox names={names(pair)} big accent={winner === pair.id ? 'green' : undefined} />
-            <div className="pair-summary-score">{pair.score}</div>
+            <div className="pair-summary-score">{pairTotalScore(pair)}</div>
             {winner === pair.id && <div className="winner-badge">עולים לשלב ג'! 🏆</div>}
           </div>
         ))}
@@ -139,13 +151,15 @@ function PairBox({
   names,
   big = false,
   accent,
+  revealing = false,
 }: {
   names: string[];
   big?: boolean;
   accent?: 'green' | 'pink';
+  revealing?: boolean;
 }) {
   return (
-    <div className={`pair-box ${big ? 'big' : ''} ${accent ?? ''}`}>
+    <div className={`pair-box ${big ? 'big' : ''} ${accent ?? ''} ${revealing ? 'revealing' : ''}`}>
       {names.map((n, i) => (
         <span key={i} className="pair-box-name">
           {n}

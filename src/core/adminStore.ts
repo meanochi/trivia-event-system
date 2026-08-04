@@ -46,6 +46,7 @@ function soundForAction(action: GameAction): 'correct' | 'wrong' | 'reveal' | 'w
     case 'STAGE_D_ANSWER':
       return action.correct ? 'correct' : 'wrong';
     case 'STAGE_B_SETUP':
+    case 'STAGE_B_REVEAL_PAIR':
     case 'STAGE_C_SETUP':
     case 'STAGE_D_SETUP':
       return 'reveal';
@@ -120,7 +121,8 @@ export const useAdminStore = create<AdminStore>((set, get) => {
       };
       set({ content: freshContent });
       void saveContent(freshContent);
-      commitGame(initialGameState());
+      // ההגדרות שורדות איפוס — ובפרט קובץ המוזיקה שהועלה, העוצמה ומשכי הסבבים
+      commitGame({ ...initialGameState(), settings: get().game.settings });
     },
 
     updateContent(updater) {

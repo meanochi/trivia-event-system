@@ -1,6 +1,6 @@
-import type { GameAction, GameState, PlayerScore } from './types';
+import type { GameAction, GameState, PlayerScore, StageBPair } from './types';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const DEFAULT_TIMER_MS = 2 * 60 * 1000;
 
@@ -55,7 +55,13 @@ export function migrateGameState(raw: unknown): GameState {
           }
         : null,
     },
-    stageB: { ...emptyStageB(), ...(r.stageB ?? {}) },
+    stageB: (() => {
+      const sb = { ...emptyStageB(), ...(r.stageB ?? {}) };
+      sb.pairs = (sb.pairs ?? []).map((p) => ({ ...p, manualScore: p.manualScore ?? 0 }));
+      // מצב ישן ללא חשיפה הדרגתית — כל הזוגות נחשבים חשופים
+      sb.revealedPairs = r.stageB?.revealedPairs ?? sb.pairs.length;
+      return sb;
+    })(),
     stageC: {
       ...emptyStageC(),
       ...(r.stageC ?? {}),
@@ -69,7 +75,8 @@ export function migrateGameState(raw: unknown): GameState {
 
 export function emptyStageB() {
   return {
-    pairs: [],
+    pairs: [] as StageBPair[],
+    revealedPairs: 0,
     questionIds: [],
     cursor: 0,
     matchIndex: 0,
@@ -123,6 +130,19 @@ export function totalScore(s: PlayerScore | undefined): number {
 export function finaleWeightedScore(s: PlayerScore | undefined): number {
   if (!s) return 0;
   return (s.stageA ?? 0) + (s.stageC ?? 0) + (s.external ?? 0) + (s.manual ?? 0);
+}
+
+/** הניקוד המוצג לקהל בזמן משחק חי — ללא נקודות ידניות.
+ *  התוספות הידניות של המפעיל נחשפות רק במסכי הסיכום (הפתעה!). */
+export function publicLiveScore(s: PlayerScore | undefined): number {
+  if (!s) return 0;
+  return (s.stageA ?? 0) + (s.stageC ?? 0) + (s.stageD ?? 0) + (s.external ?? 0);
+}
+
+/** הניקוד המלא של זוג — כולל תוספות ידניות (למפעיל ולמסכי סיכום) */
+export function pairTotalScore(p: StageBPair | undefined | null): number {
+  if (!p) return 0;
+  return (p.score ?? 0) + (p.manualScore ?? 0);
 }
 
 /** פעולות שנשמרות בהיסטוריית ה-Undo (פעולות משחק, לא ניווט תצוגה וטיימר) */
@@ -284,8 +304,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return withPlayerScore(state, action.playerId, (s) => ({ ...s, manual: s.manual + action.delta }));
 
     case 'MANUAL_ADJUST_PAIR': {
+      // תוספת ידנית נשמרת בערוץ נפרד — הקהל רואה אותה רק בסיכום המקצה
       const pairs = state.stageB.pairs.map((p) =>
-        p.id === action.pairId ? { ...p, score: p.score + action.delta } : p,
+        p.id === action.pairId ? { ...p, manualScore: p.manualScore + action.delta } : p,
       );
       return { ...state, stageB: { ...state.stageB, pairs } };
     }
@@ -414,7 +435,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         activeStage: 'B',
         stageB: {
           ...emptyStageB(),
-          pairs: action.pairs.map((p) => ({ ...p, score: 0 })),
+          pairs: action.pairs.map((p) => ({ ...p, score: 0, manualScore: 0 })),
           questionIds: action.questionIds,
         },
         publicScreen: { kind: 'stageB-pairs' },
@@ -423,6 +444,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'STAGE_B_SHOW_PAIRS':
       return { ...state, publicScreen: { kind: 'stageB-pairs' } };
+
+    case 'STAGE_B_REVEAL_PAIR': {
+      const b = state.stageB;
+      if (b.pairs.length === 0) return state;
+      return {
+        ...state,
+        stageB: { ...b, revealedPairs: Math.min(b.revealedPairs + 1, b.pairs.length) },
+        publicScreen: { kind: 'stageB-pairs' },
+      };
+    }
 
     case 'STAGE_B_MATCH_INTRO': {
       return {

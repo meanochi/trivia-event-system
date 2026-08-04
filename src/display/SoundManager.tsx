@@ -118,6 +118,7 @@ export default function SoundManager({ snapshot }: { snapshot: DisplaySnapshot |
     const el = audioRef.current;
     if (el) {
       el.volume = musicVolume;
+      el.loop = true;
       if (useFile) void el.play().catch(() => {});
       else el.pause();
     }
@@ -129,5 +130,18 @@ export default function SoundManager({ snapshot }: { snapshot: DisplaySnapshot |
     if (audioRef.current) audioRef.current.volume = musicVolume;
   }, [musicVolume]);
 
-  return trackUrl ? <audio ref={audioRef} src={trackUrl} loop /> : null;
+  // loop + הפעלה מחדש ב-onEnded — חגורה ושלייקס: גם אם ה-loop של הדפדפן
+  // נכשל (קורה עם קבצים/פורמטים מסוימים), המנגינה מתחילה שוב מיד
+  return trackUrl ? (
+    <audio
+      ref={audioRef}
+      src={trackUrl}
+      loop
+      onEnded={(e) => {
+        const el = e.currentTarget;
+        el.currentTime = 0;
+        void el.play().catch(() => {});
+      }}
+    />
+  ) : null;
 }

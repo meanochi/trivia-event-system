@@ -1,5 +1,5 @@
 import type { DisplaySnapshot } from '../core/types';
-import { SPECIAL_PER_DUEL, stageCActivePlayerId, totalScore } from '../core/reducer';
+import { SPECIAL_PER_DUEL, publicLiveScore, stageCActivePlayerId, totalScore } from '../core/reducer';
 import { formatTime } from '../core/format';
 import { reportBrokenImage, useDisplayImage } from './displayImages';
 import Logo from '../components/Logo';
@@ -59,7 +59,7 @@ export function StageCSpecial({ snapshot }: { snapshot: DisplaySnapshot }) {
         {players.map((p) => (
           <div key={p!.id} className={`pair-score-box ${p!.id === activeId ? 'active' : ''}`}>
             <span className="pair-score-names">{p!.name}</span>
-            <span className="pair-score-value">{totalScore(game.scores[p!.id])}</span>
+            <span className="pair-score-value">{publicLiveScore(game.scores[p!.id])}</span>
           </div>
         ))}
       </footer>
@@ -108,7 +108,7 @@ export function StageCImage({ snapshot }: { snapshot: DisplaySnapshot }) {
         {players.map((p) => (
           <div key={p!.id} className={`pair-score-box ${p!.id === activeId ? 'active' : ''}`}>
             <span className="pair-score-names">{p!.name}</span>
-            <span className="pair-score-value">{totalScore(game.scores[p!.id])}</span>
+            <span className="pair-score-value">{publicLiveScore(game.scores[p!.id])}</span>
           </div>
         ))}
       </footer>

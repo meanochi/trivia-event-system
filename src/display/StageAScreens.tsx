@@ -1,6 +1,6 @@
 import type { DisplaySnapshot, GroupId } from '../core/types';
 import { GROUP_IDS } from '../core/types';
-import { stageAActivePlayerId, totalScore } from '../core/reducer';
+import { publicLiveScore, stageAActivePlayerId, totalScore } from '../core/reducer';
 import Logo from '../components/Logo';
 
 /** מסכי הקהל של שלב א' — הסיבוב המהיר */
@@ -55,7 +55,7 @@ export function StageAQuestion({ snapshot }: { snapshot: DisplaySnapshot }) {
         {members.map((p) => (
           <div key={p!.id} className={`score-row ${p!.id === activeId ? 'active' : ''}`}>
             <span className="score-row-name">{p!.name}</span>
-            <span className="score-row-value">{totalScore(game.scores[p!.id])}</span>
+            <span className="score-row-value">{publicLiveScore(game.scores[p!.id])}</span>
           </div>
         ))}
       </aside>

@@ -1,5 +1,5 @@
 import { useAdminStore } from '../core/adminStore';
-import { totalScore } from '../core/reducer';
+import { pairTotalScore, totalScore } from '../core/reducer';
 import { GROUP_IDS } from '../core/types';
 
 /**
@@ -24,6 +24,7 @@ export default function ScorePanel() {
   return (
     <section className="panel score-panel">
       <h2 className="section-title">פאנל ניקוד ידני</h2>
+      <p className="hint">🤫 נקודות ידניות אינן מוצגות לקהל בזמן המשחק — הן נחשפות רק במסכי הסיכום.</p>
 
       {game.activeStage === 'B' && pairs.length > 0 && (
         <div className="pair-score-panel">
@@ -34,7 +35,7 @@ export default function ScorePanel() {
                 <span className="score-name">
                   זוג {i + 1}: {p.playerIds.map(nameOf).join(' ו')}
                 </span>
-                <span className="score-value">{p.score}</span>
+                <span className="score-value">{pairTotalScore(p)}</span>
                 <span className="score-buttons">
                   <button
                     className="btn btn-mini"
